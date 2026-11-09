@@ -95,6 +95,7 @@ export default function Correcao() {
         <span style={{fontWeight:700,fontSize:'1rem'}}>👥 Painel de Alunos</span>
         <div style={{display:'flex',gap:'10px',alignItems:'center'}}>
           <button onClick={() => router.push('/turmas')} style={s.btnSecundario}>🏫 Turmas</button>
+          <button onClick={() => router.push('/mensagens')} style={s.btnSecundario}>💬 Mensagens</button>
           <button onClick={() => router.push('/controle-acessos')} style={s.btnSecundario}>🔑 Controle de Acessos</button>
           <button onClick={() => router.push('/exercicios')} style={s.btnSecundario}>Ver Exercícios</button>
           <button onClick={sair} style={s.btnSair}>Sair</button>

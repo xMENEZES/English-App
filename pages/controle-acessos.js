@@ -33,8 +33,8 @@ export default function ControleAcessos() {
     return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
   }
 
-  const carregarAlunos = async (session) => {
-    setCarregando(true)
+  const carregarAlunos = async (session, silencioso = false) => {
+    if (!silencioso) setCarregando(true)
     const h = await headers(session)
     const r = await fetch('/api/admin/list-users', { headers: h })
     const d = await r.json()
@@ -53,7 +53,7 @@ export default function ControleAcessos() {
     if (r.ok) {
       setMsgModal('✅ Convite enviado com sucesso!')
       setEmailConvite('')
-      setTimeout(() => { setModalAberto(false); setMsgModal(''); carregarAlunos() }, 1800)
+      setTimeout(() => { setModalAberto(false); setMsgModal(''); carregarAlunos(null, true) }, 1800)
     } else {
       setMsgModal('❌ ' + d.error)
     }
@@ -67,9 +67,35 @@ export default function ControleAcessos() {
     setConfirmacao(null)
     if (r.ok) {
       setMsgGlobal({ tipo: 'ok', texto: `Acesso de ${confirmacao.nome || confirmacao.email} removido.` })
-      carregarAlunos()
+      carregarAlunos(null, true)
     } else {
       setMsgGlobal({ tipo: 'err', texto: d.error })
+    }
+    setTimeout(() => setMsgGlobal({ tipo: '', texto: '' }), 4000)
+  }
+
+  const OPCOES_CHAT = [
+    { v: 'nao_classificado', t: 'Não classificado (chat bloqueado)' },
+    { v: 'adulto', t: 'Adulto' },
+    { v: 'menor_consentido', t: 'Menor — consentimento do responsável registrado' },
+    { v: 'menor_sem_consentimento', t: 'Menor — sem consentimento (chat bloqueado)' }
+  ]
+
+  const classificarAluno = async (aluno, valor) => {
+    if (valor === 'nao_classificado') return
+    const nome = aluno.full_name || aluno.email
+    if (valor === 'menor_consentido' &&
+        !window.confirm(`Confirma que você recebeu o termo de consentimento do responsável de ${nome}? Isso libera o chat para este aluno menor.`)) return
+    const h = await headers()
+    const body = { alunoId: aluno.id, menor: valor !== 'adulto', consentimento: valor === 'menor_consentido' }
+    const r = await fetch('/api/admin/classificar', { method: 'POST', headers: h, body: JSON.stringify(body) })
+    const d = await r.json().catch(() => ({}))
+    if (r.ok) {
+      // Atualiza so a linha do aluno, sem recarregar a tela inteira
+      setDados(d => ({ ...d, students: d.students.map(x => x.id === aluno.id ? { ...x, chat: valor } : x) }))
+      setMsgGlobal({ tipo: 'ok', texto: `Classificação de ${nome} atualizada.` })
+    } else {
+      setMsgGlobal({ tipo: 'err', texto: d.error || 'Erro ao classificar' })
     }
     setTimeout(() => setMsgGlobal({ tipo: '', texto: '' }), 4000)
   }
@@ -100,6 +126,7 @@ export default function ControleAcessos() {
         <div style={{display:'flex',gap:'8px'}}>
           <button onClick={() => router.push('/correcao')} style={s.btnSec}>👥 Painel de Alunos</button>
           <button onClick={() => router.push('/turmas')} style={s.btnSec}>🏫 Turmas</button>
+          <button onClick={() => router.push('/mensagens')} style={s.btnSec}>💬 Mensagens</button>
           <button onClick={() => router.push('/exercicios')} style={s.btnSec}>📚 Exercícios</button>
           <button onClick={sair} style={s.btnSec}>Sair</button>
         </div>
@@ -155,6 +182,7 @@ export default function ControleAcessos() {
                   <tr style={{background:'#0d2157',color:'#fff'}}>
                     <th style={s.th}>Nome</th>
                     <th style={s.th}>E-mail</th>
+                    <th style={s.th}>Chat</th>
                     <th style={{...s.th,textAlign:'center'}}>Ações</th>
                   </tr>
                 </thead>
@@ -167,6 +195,12 @@ export default function ControleAcessos() {
                           : <span style={{color:'#aaa',fontStyle:'italic'}}>Cadastro pendente</span>}
                       </td>
                       <td style={s.td}>{a.email}</td>
+                      <td style={s.td}>
+                        <select value={a.chat || 'nao_classificado'} onChange={e => classificarAluno(a, e.target.value)}
+                          style={{...s.selectChat, borderColor: (a.chat === 'adulto' || a.chat === 'menor_consentido') ? '#2e7d32' : '#ef9a9a'}}>
+                          {OPCOES_CHAT.map(o => <option key={o.v} value={o.v} disabled={o.v === 'nao_classificado'}>{o.t}</option>)}
+                        </select>
+                      </td>
                       <td style={{...s.td,textAlign:'center'}}>
                         <div style={{display:'flex',gap:'8px',justifyContent:'center',flexWrap:'wrap'}}>
                           <button onClick={() => redefinirSenha(a.email, a.full_name)} style={s.btnReset}>
@@ -268,6 +302,7 @@ const s = {
   msgErr: {background:'#ffebee',color:'#c62828',borderLeft:'4px solid #c62828'},
   btnPrimario: {background:'#1565c0',color:'#fff',border:'none',borderRadius:'9px',padding:'9px 20px',cursor:'pointer',fontSize:'.88rem',fontWeight:700},
   btnSec: {background:'rgba(255,255,255,.2)',border:'1px solid rgba(255,255,255,.5)',color:'#fff',padding:'5px 12px',borderRadius:'8px',cursor:'pointer',fontSize:'.8rem'},
+  selectChat: {border:'2px solid #e0e0e0',borderRadius:'8px',padding:'6px 8px',fontSize:'.82rem',background:'#fff',maxWidth:'230px'},
   btnReset: {background:'#e3f2fd',color:'#1565c0',border:'1px solid #90caf9',borderRadius:'7px',padding:'6px 12px',cursor:'pointer',fontSize:'.82rem',fontWeight:600,whiteSpace:'nowrap'},
   btnRemover: {background:'#ffebee',color:'#c62828',border:'1px solid #ef9a9a',borderRadius:'7px',padding:'6px 12px',cursor:'pointer',fontSize:'.82rem',fontWeight:600,whiteSpace:'nowrap'},
   btnCancelar: {background:'#f5f5f5',color:'#555',border:'1px solid #ddd',borderRadius:'8px',padding:'9px 18px',cursor:'pointer',fontSize:'.88rem'},
