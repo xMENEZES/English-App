@@ -33,8 +33,8 @@ export default function ControleAcessos() {
     return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
   }
 
-  const carregarAlunos = async (session) => {
-    setCarregando(true)
+  const carregarAlunos = async (session, silencioso = false) => {
+    if (!silencioso) setCarregando(true)
     const h = await headers(session)
     const r = await fetch('/api/admin/list-users', { headers: h })
     const d = await r.json()
@@ -53,7 +53,7 @@ export default function ControleAcessos() {
     if (r.ok) {
       setMsgModal('✅ Convite enviado com sucesso!')
       setEmailConvite('')
-      setTimeout(() => { setModalAberto(false); setMsgModal(''); carregarAlunos() }, 1800)
+      setTimeout(() => { setModalAberto(false); setMsgModal(''); carregarAlunos(null, true) }, 1800)
     } else {
       setMsgModal('❌ ' + d.error)
     }
@@ -67,7 +67,7 @@ export default function ControleAcessos() {
     setConfirmacao(null)
     if (r.ok) {
       setMsgGlobal({ tipo: 'ok', texto: `Acesso de ${confirmacao.nome || confirmacao.email} removido.` })
-      carregarAlunos()
+      carregarAlunos(null, true)
     } else {
       setMsgGlobal({ tipo: 'err', texto: d.error })
     }
@@ -91,8 +91,9 @@ export default function ControleAcessos() {
     const r = await fetch('/api/admin/classificar', { method: 'POST', headers: h, body: JSON.stringify(body) })
     const d = await r.json().catch(() => ({}))
     if (r.ok) {
+      // Atualiza so a linha do aluno, sem recarregar a tela inteira
+      setDados(d => ({ ...d, students: d.students.map(x => x.id === aluno.id ? { ...x, chat: valor } : x) }))
       setMsgGlobal({ tipo: 'ok', texto: `Classificação de ${nome} atualizada.` })
-      carregarAlunos()
     } else {
       setMsgGlobal({ tipo: 'err', texto: d.error || 'Erro ao classificar' })
     }

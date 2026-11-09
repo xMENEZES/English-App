@@ -7,15 +7,17 @@ export default async function handler(req, res) {
   if (!teacher) return res.status(403).json({ error: 'Acesso negado' })
 
   const slotLimit = limiteDeVagas(teacher)
-  const { users, error } = await listAllUsers()
+  // As 3 consultas sao independentes: rodam juntas para reduzir o tempo de resposta
+  const [{ users, error }, { data: profiles }, { data: classif }] = await Promise.all([
+    listAllUsers(),
+    supabaseAdmin.from('profiles').select('id, full_name').eq('role', 'student'),
+    supabaseAdmin.from('classificacao_aluno').select('aluno_id, menor_idade, consentimento_em').eq('teacher_id', teacher.id)
+  ])
   if (error) return res.status(400).json({ error: error.message })
 
-  const { data: profiles } = await supabaseAdmin.from('profiles').select('id, full_name').eq('role', 'student')
   const nameMap = {}
-  if (profiles) profiles.forEach(p => { nameMap[p.id] = p.full_name })
+  ;(profiles || []).forEach(p => { nameMap[p.id] = p.full_name })
 
-  const { data: classif } = await supabaseAdmin.from('classificacao_aluno')
-    .select('aluno_id, menor_idade, consentimento_em').eq('teacher_id', teacher.id)
   const classPor = {}
   ;(classif || []).forEach(c => { classPor[c.aluno_id] = c })
   const statusChat = (id) => {
