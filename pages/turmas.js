@@ -113,6 +113,7 @@ export default function Turmas() {
         <span style={{ fontWeight: 700, fontSize: '1rem' }}>🏫 Turmas</span>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button onClick={() => router.push('/correcao')} style={s.btnSec}>👥 Painel de Alunos</button>
+          <button onClick={() => router.push('/mensagens')} style={s.btnSec}>💬 Mensagens</button>
           <button onClick={() => router.push('/controle-acessos')} style={s.btnSec}>🔑 Acessos</button>
           <button onClick={() => router.push('/exercicios')} style={s.btnSec}>📚 Exercícios</button>
           <button onClick={sair} style={s.btnSec}>Sair</button>
