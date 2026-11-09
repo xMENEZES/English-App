@@ -732,17 +732,18 @@ var curUnit=null,curIdx=0,curScore=0,answered=false,selOpt=null,badges={};
 })();
 var STRICT_CASE=['I','English','Portuguese','Spanish','French','German','Chinese'];
 function saveResult(unitId,questionIdx,question,userAnswer,correctAnswer,isCorrect){
-  var client=window.__sbClient, userId=window.__sbUserId;
-  if(!client||!userId)return;
-  client.from('exercise_results').insert({
-    user_id:userId,
-    unit_id:unitId,
-    question_idx:questionIdx,
-    question:question,
-    user_answer:userAnswer,
-    correct_answer:correctAnswer,
-    is_correct:isCorrect
-  }).then(function(){});
+  // O servidor corrige a resposta e grava; so enviamos unidade, questao e a resposta dada.
+  var client=window.__sbClient;
+  if(!client)return;
+  client.auth.getSession().then(function(r){
+    var t=r&&r.data&&r.data.session&&r.data.session.access_token;
+    if(!t)return;
+    return fetch('/api/exercicios/resultado',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},
+      body:JSON.stringify({unitId:unitId,questionIdx:questionIdx,userAnswer:userAnswer})
+    });
+  }).catch(function(){});
 }
 function stripPunct(w){return w.replace(/[.?!,;:]+$/,'');}
 function answerMatch(u,a){

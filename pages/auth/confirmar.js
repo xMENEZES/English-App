@@ -50,8 +50,7 @@ export default function Confirmar() {
     if (!isReset) {
       const { error: profileErr } = await supabase.from('profiles').upsert({
         id: sessao.user.id,
-        full_name: nome.trim() + ' ' + sobrenome.trim(),
-        role: 'student'
+        full_name: nome.trim() + ' ' + sobrenome.trim()
       })
       if (profileErr) console.warn('Perfil:', profileErr.message)
     }
