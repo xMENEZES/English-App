@@ -82,8 +82,9 @@ export default function Turmas() {
     const { ok, d } = await api('/api/turmas/membros', { method: 'PUT', body: { turmaId: sel.id, alunoIds: marcados } })
     setSalvando(false)
     if (!ok) { avisar('err', d.error || 'Erro ao salvar alunos'); return }
+    setSelId(null)
     await carregar()
-    avisar('ok', 'Turma salva.')
+    avisar('ok', `Turma "${nomeEdit.trim() || sel.nome}" salva com sucesso!`)
   }
 
   const excluir = async () => {
