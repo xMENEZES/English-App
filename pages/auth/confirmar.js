@@ -35,7 +35,7 @@ export default function Confirmar() {
     setErro('')
     if (!isReset && !nome.trim()) { setErro('Informe seu nome.'); return }
     if (!isReset && !sobrenome.trim()) { setErro('Informe seu sobrenome.'); return }
-    if (senha.length < 6) { setErro('A senha deve ter pelo menos 6 caracteres.'); return }
+    if (senha.length < 8) { setErro('A senha deve ter pelo menos 8 caracteres.'); return }
     if (senha !== confirmar) { setErro('As senhas não coincidem.'); return }
     setSalvando(true)
 

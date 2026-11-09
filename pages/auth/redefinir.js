@@ -33,7 +33,7 @@ export default function Redefinir() {
   const salvar = async (e) => {
     e.preventDefault()
     setErro('')
-    if (senha.length < 6) { setErro('A senha deve ter pelo menos 6 caracteres.'); return }
+    if (senha.length < 8) { setErro('A senha deve ter pelo menos 8 caracteres.'); return }
     if (senha !== confirmar) { setErro('As senhas não coincidem.'); return }
     setSalvando(true)
     const { error } = await supabase.auth.updateUser({ password: senha })
