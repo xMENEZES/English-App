@@ -24,7 +24,7 @@ export default function Correcao() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) { router.push('/'); return }
-      const role = session.user.user_metadata?.role
+      const role = session.user.app_metadata?.role
       if (role !== 'teacher') { router.push('/exercicios'); return }
       setSessao(session)
       carregarAlunos()

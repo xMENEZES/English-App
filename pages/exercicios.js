@@ -94,7 +94,7 @@ export default function Exercicios() {
       <div style={{background:'#0a1845',color:'#fff',padding:'7px 12px',display:'flex',justifyContent:'space-between',alignItems:'center',fontSize:'.75rem',flexWrap:'wrap',gap:'4px'}}>
         <span>Logado como: <strong>{sessao.user.email}</strong></span>
         <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
-          {sessao.user.user_metadata?.role === 'teacher' && (<>
+          {sessao.user.app_metadata?.role === 'teacher' && (<>
             <button onClick={() => router.push('/correcao')}
               style={{background:'rgba(255,255,255,.25)',border:'1px solid rgba(255,255,255,.7)',color:'#fff',padding:'4px 14px',borderRadius:'20px',cursor:'pointer',fontSize:'.8rem',fontWeight:600}}>
               👥 Painel de Alunos

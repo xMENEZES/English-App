@@ -20,7 +20,7 @@ export default function ControleAcessos() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) { router.push('/'); return }
-      if (session.user.user_metadata?.role !== 'teacher') { router.push('/exercicios'); return }
+      if (session.user.app_metadata?.role !== 'teacher') { router.push('/exercicios'); return }
       setSessao(session)
       carregarAlunos(session)
     })
@@ -76,7 +76,7 @@ export default function ControleAcessos() {
 
   const redefinirSenha = async (email, nome) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://english-step-by-step.vercel.app/auth/redefinir'
+      redirectTo: (process.env.NEXT_PUBLIC_SITE_URL || 'https://english-step-by-step.vercel.app') + '/auth/redefinir'
     })
     if (error) {
       setMsgGlobal({ tipo: 'err', texto: 'Erro ao enviar: ' + error.message })
