@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabaseClient'
 import Head from 'next/head'
+import CampoSenha from '../components/CampoSenha'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -65,14 +66,7 @@ export default function Login() {
             </div>
             <div style={s.campo}>
               <label style={s.label}>Senha</label>
-              <input
-                type="password"
-                value={senha}
-                onChange={e => setSenha(e.target.value)}
-                placeholder="••••••••"
-                required
-                style={s.input}
-              />
+              <CampoSenha value={senha} onChange={e => setSenha(e.target.value)} placeholder="••••••••" style={s.input} autoComplete="current-password" />
             </div>
             {erro && <div style={s.erro}>{erro}</div>}
             <button type="submit" disabled={carregando} style={s.btn}>
