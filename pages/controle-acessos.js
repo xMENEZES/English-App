@@ -99,6 +99,7 @@ export default function ControleAcessos() {
         <span style={{fontWeight:700,fontSize:'1rem'}}>🔑 Controle de Acessos</span>
         <div style={{display:'flex',gap:'8px'}}>
           <button onClick={() => router.push('/correcao')} style={s.btnSec}>👥 Painel de Alunos</button>
+          <button onClick={() => router.push('/turmas')} style={s.btnSec}>🏫 Turmas</button>
           <button onClick={() => router.push('/exercicios')} style={s.btnSec}>📚 Exercícios</button>
           <button onClick={sair} style={s.btnSec}>Sair</button>
         </div>
