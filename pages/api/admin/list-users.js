@@ -1,24 +1,20 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
+import { getTeacher, listAllUsers, alunosDoProfessor, limiteDeVagas } from '../../../lib/authz'
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).end()
-  const token = req.headers.authorization?.replace('Bearer ', '')
-  if (!token) return res.status(401).json({ error: 'Sem token' })
-  const { data: { user }, error: ue } = await supabaseAdmin.auth.getUser(token)
-  if (!user || user.user_metadata?.role !== 'teacher') return res.status(403).json({ error: 'Acesso negado' })
+  const teacher = await getTeacher(req)
+  if (!teacher) return res.status(403).json({ error: 'Acesso negado' })
 
-  // Limite de vagas específico por professor (padrão 30)
-  const slotLimit = user.user_metadata?.slot_limit || 30
-
-  const { data: authData, error } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+  const slotLimit = limiteDeVagas(teacher)
+  const { users, error } = await listAllUsers()
   if (error) return res.status(400).json({ error: error.message })
 
   const { data: profiles } = await supabaseAdmin.from('profiles').select('id, full_name').eq('role', 'student')
   const nameMap = {}
   if (profiles) profiles.forEach(p => { nameMap[p.id] = p.full_name })
 
-  const students = authData.users
-    .filter(u => u.user_metadata?.role !== 'teacher' && u.id !== user.id)
+  const students = alunosDoProfessor(users, teacher)
     .map(u => ({ id: u.id, email: u.email, full_name: nameMap[u.id] || null, created_at: u.created_at }))
     .sort((a, b) => (a.full_name || 'zzz').localeCompare(b.full_name || 'zzz'))
 

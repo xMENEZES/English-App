@@ -10,8 +10,23 @@ export default function Exercicios() {
   const router = useRouter()
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // getUser() valida o token no servidor: se o professor removeu o aluno, a sessao
+    // local (getSession) ainda parece valida ate expirar, entao confirmamos aqui.
+    const validarUsuario = async () => {
+      const { data, error } = await supabase.auth.getUser()
+      if (error || !data?.user) {
+        await supabase.auth.signOut()
+        router.push('/')
+      }
+    }
+    const aoVoltarAoFoco = () => { if (document.visibilityState === 'visible') validarUsuario() }
+    document.addEventListener('visibilitychange', aoVoltarAoFoco)
+    const timer = setInterval(validarUsuario, 120000)
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { router.push('/'); return }
+      const { error: ue } = await supabase.auth.getUser()
+      if (ue) { await supabase.auth.signOut(); router.push('/'); return }
       // Se o usuario ainda nao definiu sua propria senha, redireciona para confirmar
       if (!session.user.user_metadata?.password_set) {
         router.push('/auth/confirmar')
@@ -61,7 +76,11 @@ export default function Exercicios() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       if (!session) router.push('/')
     })
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      document.removeEventListener('visibilitychange', aoVoltarAoFoco)
+      clearInterval(timer)
+    }
   }, [])
 
   // Sempre que a pagina renderizar, restaurar badges e progresso do localStorage
@@ -94,7 +113,7 @@ export default function Exercicios() {
       <div style={{background:'#0a1845',color:'#fff',padding:'7px 12px',display:'flex',justifyContent:'space-between',alignItems:'center',fontSize:'.75rem',flexWrap:'wrap',gap:'4px'}}>
         <span>Logado como: <strong>{sessao.user.email}</strong></span>
         <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
-          {sessao.user.user_metadata?.role === 'teacher' && (<>
+          {sessao.user.app_metadata?.role === 'teacher' && (<>
             <button onClick={() => router.push('/correcao')}
               style={{background:'rgba(255,255,255,.25)',border:'1px solid rgba(255,255,255,.7)',color:'#fff',padding:'4px 14px',borderRadius:'20px',cursor:'pointer',fontSize:'.8rem',fontWeight:600}}>
               👥 Painel de Alunos
