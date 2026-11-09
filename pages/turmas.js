@@ -68,8 +68,8 @@ export default function Turmas() {
     if (!ok) { avisar('err', d.error || 'Erro ao criar turma'); return }
     setTurmas(ts => [...ts, d.turma].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')))
     setNovoNome('')
-    abrirTurma(d.turma)
-    avisar('ok', `Turma "${d.turma.nome}" criada. Marque os alunos e salve.`)
+    setSelId(null)
+    avisar('ok', `Turma "${d.turma.nome}" criada com sucesso! Clique nela para adicionar alunos.`)
   }
 
   const salvar = async () => {
@@ -150,7 +150,7 @@ export default function Turmas() {
           {/* Editor da turma */}
           <div style={s.card}>
             {!sel ? (
-              <p style={s.vazio}>Selecione uma turma para escolher os alunos que fazem parte dela.</p>
+              <p style={s.vazio}>Clique em uma turma para visualizar e editar seus alunos.</p>
             ) : (
               <>
                 <h2 style={s.titulo}>Editar turma</h2>
@@ -178,6 +178,7 @@ export default function Turmas() {
 
                 <div style={{ display: 'flex', gap: '10px', marginTop: '16px', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                   <button onClick={excluir} style={s.btnRemover}>Excluir turma</button>
+                  <button onClick={() => setSelId(null)} style={s.btnFechar}>Fechar</button>
                   <button onClick={salvar} disabled={salvando || !alterado}
                     style={{ ...s.btnPrimario, opacity: (salvando || !alterado) ? .5 : 1 }}>
                     {salvando ? 'Salvando...' : 'Salvar alterações'}
@@ -212,5 +213,6 @@ const s = {
   msgErr: { background: '#ffebee', color: '#c62828', borderLeft: '4px solid #c62828' },
   btnPrimario: { background: '#1565c0', color: '#fff', border: 'none', borderRadius: '9px', padding: '9px 20px', cursor: 'pointer', fontSize: '.88rem', fontWeight: 700 },
   btnSec: { background: 'rgba(255,255,255,.2)', border: '1px solid rgba(255,255,255,.5)', color: '#fff', padding: '5px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '.8rem' },
+  btnFechar: { background: '#f5f5f5', color: '#555', border: '1px solid #ddd', borderRadius: '9px', padding: '9px 16px', cursor: 'pointer', fontSize: '.88rem' },
   btnRemover: { background: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a', borderRadius: '9px', padding: '9px 16px', cursor: 'pointer', fontSize: '.88rem', fontWeight: 600 },
 }
