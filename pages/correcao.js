@@ -35,13 +35,16 @@ export default function Correcao() {
     return () => subscription.unsubscribe()
   }, [])
 
+  // Lista vem da API (fonte de verdade: usuarios vinculados a este professor),
+  // assim aluno sem linha em profiles tambem aparece (usa o e-mail como nome).
   const carregarAlunos = async () => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, full_name')
-      .eq('role', 'student')
-      .order('full_name')
-    if (!error) setAlunos(data || [])
+    const { data: sess } = await supabase.auth.getSession()
+    const token = sess?.session?.access_token
+    const r = await fetch('/api/admin/list-users', { headers: { Authorization: `Bearer ${token}` } })
+    if (r.ok) {
+      const d = await r.json()
+      setAlunos((d.students || []).map(a => ({ ...a, full_name: a.full_name || a.email })))
+    }
     setCarregando(false)
   }
 

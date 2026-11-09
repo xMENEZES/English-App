@@ -10,8 +10,23 @@ export default function Exercicios() {
   const router = useRouter()
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // getUser() valida o token no servidor: se o professor removeu o aluno, a sessao
+    // local (getSession) ainda parece valida ate expirar, entao confirmamos aqui.
+    const validarUsuario = async () => {
+      const { data, error } = await supabase.auth.getUser()
+      if (error || !data?.user) {
+        await supabase.auth.signOut()
+        router.push('/')
+      }
+    }
+    const aoVoltarAoFoco = () => { if (document.visibilityState === 'visible') validarUsuario() }
+    document.addEventListener('visibilitychange', aoVoltarAoFoco)
+    const timer = setInterval(validarUsuario, 120000)
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { router.push('/'); return }
+      const { error: ue } = await supabase.auth.getUser()
+      if (ue) { await supabase.auth.signOut(); router.push('/'); return }
       // Se o usuario ainda nao definiu sua propria senha, redireciona para confirmar
       if (!session.user.user_metadata?.password_set) {
         router.push('/auth/confirmar')
@@ -61,7 +76,11 @@ export default function Exercicios() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       if (!session) router.push('/')
     })
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      document.removeEventListener('visibilitychange', aoVoltarAoFoco)
+      clearInterval(timer)
+    }
   }, [])
 
   // Sempre que a pagina renderizar, restaurar badges e progresso do localStorage
