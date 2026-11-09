@@ -11,6 +11,8 @@ export default function Correcao() {
   const [resultados, setResultados] = useState([])
   const [unitSel, setUnitSel] = useState(1)
   const [loadingAluno, setLoadingAluno] = useState(false)
+  const [turmas, setTurmas] = useState([])
+  const [turmaFiltro, setTurmaFiltro] = useState('')
   const router = useRouter()
 
   const UNIDADES = [
@@ -47,6 +49,8 @@ export default function Correcao() {
       lista.sort((a, b) => a.full_name.localeCompare(b.full_name, 'pt-BR', { sensitivity: 'base' }))
       setAlunos(lista)
     }
+    const rt = await fetch('/api/turmas', { headers: { Authorization: `Bearer ${token}` } })
+    if (rt.ok) setTurmas((await rt.json()).turmas || [])
     setCarregando(false)
   }
 
@@ -94,6 +98,7 @@ export default function Correcao() {
       <div style={s.header}>
         <span style={{fontWeight:700,fontSize:'1rem'}}>👥 Painel de Alunos</span>
         <div style={{display:'flex',gap:'10px',alignItems:'center'}}>
+          <button onClick={() => router.push('/turmas')} style={s.btnSecundario}>🏫 Turmas</button>
           <button onClick={() => router.push('/controle-acessos')} style={s.btnSecundario}>🔑 Controle de Acessos</button>
           <button onClick={() => router.push('/exercicios')} style={s.btnSecundario}>Ver Exercícios</button>
           <button onClick={sair} style={s.btnSair}>Sair</button>
@@ -104,11 +109,18 @@ export default function Correcao() {
         {/* Seletor de aluno */}
         <div style={s.card}>
           <h2 style={s.secTitulo}>Selecionar Aluno</h2>
+          {turmas.length > 0 && (
+            <select value={turmaFiltro} onChange={e => setTurmaFiltro(e.target.value)}
+              style={{width:'100%',padding:'9px 12px',border:'2px solid #e0e0e0',borderRadius:'9px',fontSize:'.92rem',marginBottom:'12px',background:'#fff'}}>
+              <option value="">Todas as turmas</option>
+              {turmas.map(t => <option key={t.id} value={t.id}>{t.nome} ({t.alunoIds.length})</option>)}
+            </select>
+          )}
           {alunos.length === 0 ? (
             <p style={{color:'#888',fontSize:'.9rem'}}>Nenhum aluno cadastrado ainda.</p>
           ) : (
             <div style={s.alunosGrid}>
-              {alunos.map(a => (
+              {alunos.filter(a => !turmaFiltro || (turmas.find(t => t.id === turmaFiltro)?.alunoIds || []).includes(a.id)).map(a => (
                 <button key={a.id} onClick={() => selecionarAluno(a)}
                   style={{...s.alunoBtn, ...(alunoSel?.id===a.id ? s.alunoBtnAtivo : {})}}>
                   <span style={s.alunoIco}>👤</span>

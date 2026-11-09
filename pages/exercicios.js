@@ -122,6 +122,10 @@ export default function Exercicios() {
               style={{background:'rgba(255,255,255,.25)',border:'1px solid rgba(255,255,255,.7)',color:'#fff',padding:'4px 14px',borderRadius:'20px',cursor:'pointer',fontSize:'.8rem',fontWeight:600}}>
               🔑 Controle de Acessos
             </button>
+            <button onClick={() => router.push('/turmas')}
+              style={{background:'rgba(255,255,255,.25)',border:'1px solid rgba(255,255,255,.7)',color:'#fff',padding:'4px 14px',borderRadius:'20px',cursor:'pointer',fontSize:'.8rem',fontWeight:600}}>
+              🏫 Turmas
+            </button>
           </>)}
           <button onClick={sair} style={{background:'rgba(255,255,255,.18)',border:'1px solid rgba(255,255,255,.5)',color:'#fff',padding:'4px 14px',borderRadius:'20px',cursor:'pointer',fontSize:'.8rem'}}>Sair</button>
         </div>
