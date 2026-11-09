@@ -43,7 +43,9 @@ export default function Correcao() {
     const r = await fetch('/api/admin/list-users', { headers: { Authorization: `Bearer ${token}` } })
     if (r.ok) {
       const d = await r.json()
-      setAlunos((d.students || []).map(a => ({ ...a, full_name: a.full_name || a.email })))
+      const lista = (d.students || []).map(a => ({ ...a, full_name: a.full_name || a.email }))
+      lista.sort((a, b) => a.full_name.localeCompare(b.full_name, 'pt-BR', { sensitivity: 'base' }))
+      setAlunos(lista)
     }
     setCarregando(false)
   }
@@ -110,7 +112,10 @@ export default function Correcao() {
                 <button key={a.id} onClick={() => selecionarAluno(a)}
                   style={{...s.alunoBtn, ...(alunoSel?.id===a.id ? s.alunoBtnAtivo : {})}}>
                   <span style={s.alunoIco}>👤</span>
-                  <span style={{fontWeight:alunoSel?.id===a.id?700:400}}>{a.full_name}</span>
+                  <span style={s.alunoTextos}>
+                    <span style={{fontWeight:alunoSel?.id===a.id?700:600}}>{a.full_name}</span>
+                    {a.full_name !== a.email && <span style={s.alunoEmail}>{a.email}</span>}
+                  </span>
                 </button>
               ))}
             </div>
@@ -226,10 +231,12 @@ const s = {
   page: {maxWidth:'900px',margin:'0 auto',padding:'16px',overflowX:'hidden'},
   card: {background:'#fff',borderRadius:'14px',padding:'22px',marginBottom:'20px',boxShadow:'0 2px 8px rgba(0,0,0,.08)'},
   secTitulo: {fontSize:'1.1rem',fontWeight:700,color:'#0d2157',marginBottom:'14px'},
-  alunosGrid: {display:'flex',flexWrap:'wrap',gap:'10px'},
-  alunoBtn: {display:'flex',alignItems:'center',gap:'8px',padding:'10px 18px',border:'2px solid #e0e0e0',borderRadius:'10px',cursor:'pointer',background:'#fff',fontSize:'.92rem',color:'#333',transition:'.2s'},
+  alunosGrid: {display:'flex',flexDirection:'column',gap:'8px'},
+  alunoBtn: {display:'flex',alignItems:'center',gap:'12px',width:'100%',textAlign:'left',padding:'10px 16px',border:'2px solid #e0e0e0',borderRadius:'10px',cursor:'pointer',background:'#fff',fontSize:'.92rem',color:'#333',transition:'.2s'},
   alunoBtnAtivo: {borderColor:'#1565c0',background:'#e3f2fd',color:'#0d2157'},
-  alunoIco: {fontSize:'1.1rem'},
+  alunoIco: {fontSize:'1.2rem'},
+  alunoTextos: {display:'flex',flexDirection:'column',minWidth:0,overflowWrap:'anywhere'},
+  alunoEmail: {fontSize:'.78rem',color:'#888',fontWeight:400},
   alunoHeader: {display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'16px'},
   tabs: {display:'flex',gap:'6px',marginBottom:'16px',flexWrap:'wrap'},
   tab: {padding:'6px 10px',border:'2px solid #e0e0e0',borderRadius:'8px',cursor:'pointer',background:'#fff',fontSize:'.82rem',display:'flex',alignItems:'center',justifyContent:'center',gap:'4px',transition:'.2s',minWidth:'44px'},
