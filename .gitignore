@@ -1,4 +1,17 @@
 node_modules
 .next
-.env.local
+out
+.vercel
 .DS_Store
+npm-debug.log*
+
+# Segredos: nunca versionar (use .env.local.example como modelo)
+.env
+.env.*
+!.env.local.example
+
+# Materiais fora do codigo (propostas, prints, imagens soltas)
+images/
+*.pdf
+*.bak
+*.bkp*
