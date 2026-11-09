@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../../lib/supabaseClient'
 import Head from 'next/head'
+import CampoSenha from '../../components/CampoSenha'
+import { validarSenha, REGRA_SENHA } from '../../lib/senha'
 
 export default function Confirmar() {
   const [sessao, setSessao] = useState(null)
@@ -35,7 +37,7 @@ export default function Confirmar() {
     setErro('')
     if (!isReset && !nome.trim()) { setErro('Informe seu nome.'); return }
     if (!isReset && !sobrenome.trim()) { setErro('Informe seu sobrenome.'); return }
-    if (senha.length < 6) { setErro('A senha deve ter pelo menos 6 caracteres.'); return }
+    if (!validarSenha(senha)) { setErro(REGRA_SENHA); return }
     if (senha !== confirmar) { setErro('As senhas não coincidem.'); return }
     setSalvando(true)
 
@@ -100,13 +102,13 @@ export default function Confirmar() {
             )}
             <div style={s.campo}>
               <label style={s.label}>{isReset ? 'Nova senha' : 'Senha'}</label>
-              <input type="password" value={senha} onChange={e=>setSenha(e.target.value)}
-                placeholder="Mínimo 6 caracteres" required style={s.input} />
+              <CampoSenha value={senha} onChange={e=>setSenha(e.target.value)}
+                placeholder="Mín. 8 caracteres, 1 número e 1 símbolo" style={s.input} autoComplete="new-password" />
             </div>
             <div style={s.campo}>
               <label style={s.label}>Confirmar senha</label>
-              <input type="password" value={confirmar} onChange={e=>setConfirmar(e.target.value)}
-                placeholder="Repita a senha" required style={s.input} />
+              <CampoSenha value={confirmar} onChange={e=>setConfirmar(e.target.value)}
+                placeholder="Repita a senha" style={s.input} autoComplete="new-password" />
             </div>
             {erro && <div style={s.erro}>{erro}</div>}
             <button type="submit" disabled={salvando} style={s.btn}>
