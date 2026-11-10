@@ -130,6 +130,16 @@ const EXERCISES_CSS = `
   .home-hero h2{font-size:1.9rem;color:#0d2157;margin-bottom:6px}
   .home-hero p{color:#666;font-size:.95rem}
   .units-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-top:18px}
+  .home-tabs{display:flex;gap:6px;margin:6px 0 4px;border-bottom:2px solid #dbe4f0}
+  .home-tab{flex:1;background:none;border:none;border-bottom:4px solid transparent;margin-bottom:-2px;padding:12px 8px;cursor:pointer;font-size:.98rem;font-weight:700;color:#667;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s;font-family:inherit}
+  .home-tab:hover{color:#1565c0}
+  .home-tab.active{color:#0d2157;border-bottom-color:#f9a825}
+  .tab-badge{background:#c62828;color:#fff;border-radius:20px;padding:1px 8px;font-size:.72rem}
+  .mod-hdr{display:flex;align-items:center;gap:14px;margin:26px 0 2px}
+  .mod-num{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#0d2157,#1565c0);color:#fff;font-size:1.4rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .mod-hdr b{display:block;color:#0d2157;font-size:1.05rem}
+  .mod-hdr small{color:#777}
+  .mod-outros .mod-num{background:linear-gradient(135deg,#f9a825,#ef6c00)}
   .unit-card{background:#fff;border-radius:14px;padding:20px 18px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.09);transition:.3s;border-left:5px solid #f9a825;text-align:center}
   .unit-card:hover{transform:translateY(-4px);box-shadow:0 8px 22px rgba(0,0,0,.14)}
   .unit-num{font-size:2.2rem;color:#1565c0;font-weight:800;line-height:1}
@@ -196,6 +206,11 @@ const EXERCISES_BODY = `
     <h2>English Step By Step</h2>
     <p>Baseado no livro <strong>English Step By Step</strong> &mdash; Selecione uma unidade para comecar</p>
   </div>
+  <div class="home-tabs" role="tablist">
+    <button class="home-tab active" id="tabLivro" role="tab" onclick="homeTab('livro')">&#128214; Exercicios do Livro</button>
+    <button class="home-tab" id="tabProf" role="tab" onclick="homeTab('prof')">&#128105;&#8205;&#127979; Exercicios do Professor<span class="tab-badge" id="tabProfBadge" style="display:none"></span></button>
+  </div>
+  <div id="paneLivro">
   <div class="units-grid">
     <div class="unit-card" onclick="openUnit(1)"><div class="unit-num">1</div><div class="unit-title">I drink / I eat</div><div class="unit-desc">Alimentos, bebidas e verbos basicos</div><div class="unit-badge" id="badge1">Nao iniciado</div></div>
     <div class="unit-card" onclick="openUnit(2)"><div class="unit-num">2</div><div class="unit-title">I speak / I study</div><div class="unit-desc">Idiomas, familia e negativa</div><div class="unit-badge" id="badge2">Nao iniciado</div></div>
@@ -228,7 +243,8 @@ const EXERCISES_BODY = `
     <div class="unit-card" onclick="openUnit(29)"><div class="unit-num">29</div><div class="unit-title">Perguntas com did</div><div class="unit-desc">Did you go? What did you?</div><div class="unit-badge" id="badge29">Nao iniciado</div></div>
     <div class="unit-card" onclick="openUnit(30)"><div class="unit-num">30</div><div class="unit-title">Revisao geral W2</div><div class="unit-desc">Revisao completa do nivel</div><div class="unit-badge" id="badge30">Nao iniciado</div></div>
   </div>
-  <div id="extrasHome"></div>
+  </div>
+  <div id="extrasHome" style="display:none"></div>
 </div>
 <div id="unitContainer"></div>
 `
