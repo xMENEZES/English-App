@@ -11,6 +11,7 @@ export default function Correcao() {
   const [resultados, setResultados] = useState([])
   const [unitSel, setUnitSel] = useState(1)
   const [loadingAluno, setLoadingAluno] = useState(false)
+  const [extras, setExtras] = useState([])
   const router = useRouter()
 
   const UNIDADES = [
@@ -72,6 +73,13 @@ export default function Correcao() {
       }
       setResultados(dedup)
     }
+    // Exercicios extras do professor (desempenho deste aluno)
+    setExtras([])
+    supabase.auth.getSession()
+      .then(({ data: sd }) => fetch('/api/extras/resultados?alunoId=' + aluno.id, { headers: { Authorization: `Bearer ${sd?.session?.access_token}` } }))
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => { if (d) setExtras(d.listas || []) })
+      .catch(() => {})
     setLoadingAluno(false)
   }
 
@@ -220,6 +228,32 @@ export default function Correcao() {
                 )}
               </>
             )}
+          </div>
+        )}
+
+        {alunoSel && extras.length > 0 && (
+          <div style={s.card}>
+            <h2 style={s.secTitulo}>Exercícios extras do professor</h2>
+            {extras.map(l => (
+              <div key={l.id} style={{border:'1px solid #e0e7ef',borderRadius:'10px',padding:'12px 14px',marginBottom:'10px'}}>
+                <div style={{display:'flex',justifyContent:'space-between',gap:'8px',flexWrap:'wrap',fontWeight:700,color:'#0d2157'}}>
+                  <span>{l.titulo}{l.unidade ? ` (Unidade ${l.unidade})` : ''}</span>
+                  <span style={{fontSize:'.85rem'}}>{l.acertos} acertos · {l.respondidas} respondidas{l.pendentes ? ` · ${l.pendentes} p/ corrigir` : ''}</span>
+                </div>
+                {l.itens.map(i => (
+                  <div key={i.id} style={{fontSize:'.85rem',padding:'6px 0',borderTop:'1px solid #f0f0f0',marginTop:'6px'}}>
+                    <div style={{color:'#555',whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{i.enunciado}</div>
+                    <div style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>
+                      <b>Resposta:</b> {i.resposta}{' '}
+                      {i.status === 'pendente'
+                        ? <span style={{color:'#e65100'}}>⏳ aguardando correção</span>
+                        : <span style={{color: i.correta ? '#2e7d32' : '#c62828'}}>{i.correta ? '✔ correta' : '✘ incorreta'}</span>}
+                    </div>
+                    {i.comentario && <div style={{color:'#555'}}><b>Comentário:</b> {i.comentario}</div>}
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
         )}
       </div>

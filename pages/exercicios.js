@@ -126,6 +126,10 @@ export default function Exercicios() {
               style={{background:'rgba(255,255,255,.25)',border:'1px solid rgba(255,255,255,.7)',color:'#fff',padding:'4px 14px',borderRadius:'20px',cursor:'pointer',fontSize:'.8rem',fontWeight:600}}>
               🏫 Turmas
             </button>
+            <button onClick={() => router.push('/meus-exercicios')}
+              style={{background:'rgba(255,255,255,.25)',border:'1px solid rgba(255,255,255,.7)',color:'#fff',padding:'4px 14px',borderRadius:'20px',cursor:'pointer',fontSize:'.8rem',fontWeight:600}}>
+              📝 Meus Exercícios
+            </button>
           </>)}
           <button onClick={() => router.push('/mensagens')}
             style={{background:'rgba(255,255,255,.25)',border:'1px solid rgba(255,255,255,.7)',color:'#fff',padding:'4px 14px',borderRadius:'20px',cursor:'pointer',fontSize:'.8rem',fontWeight:600}}>
@@ -136,6 +140,7 @@ export default function Exercicios() {
       </div>
       <div dangerouslySetInnerHTML={{__html: EXERCISES_BODY}} />
       <Script src="/exercises.js" strategy="afterInteractive" />
+      <Script src="/extras.js" strategy="afterInteractive" />
     </>
   )
 }
@@ -251,6 +256,7 @@ const EXERCISES_BODY = `
     <div class="unit-card" onclick="openUnit(29)"><div class="unit-num">29</div><div class="unit-title">Perguntas com did</div><div class="unit-desc">Did you go? What did you?</div><div class="unit-badge" id="badge29">Nao iniciado</div></div>
     <div class="unit-card" onclick="openUnit(30)"><div class="unit-num">30</div><div class="unit-title">Revisao geral W2</div><div class="unit-desc">Revisao completa do nivel</div><div class="unit-badge" id="badge30">Nao iniciado</div></div>
   </div>
+  <div id="extrasHome"></div>
 </div>
 <div id="unitContainer"></div>
 `
