@@ -19,6 +19,9 @@ export default function ControleAcessos() {
   const [confirmacao, setConfirmacao] = useState(null) // { userId, nome, acao }
   const router = useRouter()
   const mobile = useMobile()
+  const [consent, setConsent] = useState(null)   // aluno cujo consentimento esta sendo registrado
+  const [formConsent, setFormConsent] = useState({ nome: '', vinculo: '', recebido: false })
+  const [salvandoConsent, setSalvandoConsent] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -87,8 +90,7 @@ export default function ControleAcessos() {
   const classificarAluno = async (aluno, valor) => {
     if (valor === 'nao_classificado') return
     const nome = aluno.full_name || aluno.email
-    if (valor === 'menor_consentido' &&
-        !window.confirm(`Confirma que você recebeu o termo de consentimento do responsável de ${nome}? Isso libera o chat para este aluno menor.`)) return
+    if (valor === 'menor_consentido') { setFormConsent({ nome: '', vinculo: '', recebido: false }); setConsent(aluno); return }
     const h = await headers()
     const body = { alunoId: aluno.id, menor: valor !== 'adulto', consentimento: valor === 'menor_consentido' }
     const r = await fetch('/api/admin/classificar', { method: 'POST', headers: h, body: JSON.stringify(body) })
@@ -101,6 +103,27 @@ export default function ControleAcessos() {
       setMsgGlobal({ tipo: 'err', texto: d.error || 'Erro ao classificar' })
     }
     setTimeout(() => setMsgGlobal({ tipo: '', texto: '' }), 4000)
+  }
+
+  const registrarConsentimento = async (e) => {
+    e.preventDefault()
+    if (!consent) return
+    setSalvandoConsent(true)
+    const h = await headers()
+    const r = await fetch('/api/admin/classificar', { method: 'POST', headers: h, body: JSON.stringify({
+      alunoId: consent.id, menor: true, consentimento: true,
+      responsavelNome: formConsent.nome, responsavelVinculo: formConsent.vinculo, termoRecebido: formConsent.recebido
+    }) })
+    const d = await r.json().catch(() => ({}))
+    setSalvandoConsent(false)
+    if (r.ok) {
+      setDados(x => ({ ...x, students: x.students.map(a => a.id === consent.id ? { ...a, chat: 'menor_consentido' } : a) }))
+      setMsgGlobal({ tipo: 'ok', texto: `Consentimento registrado para ${consent.full_name || consent.email}. Chat e foto liberados.` })
+      setConsent(null)
+    } else {
+      setMsgGlobal({ tipo: 'err', texto: d.error || 'Erro ao registrar o consentimento' })
+    }
+    setTimeout(() => setMsgGlobal({ tipo: '', texto: '' }), 5000)
   }
 
   const redefinirSenha = async (email, nome) => {
@@ -273,6 +296,43 @@ export default function ControleAcessos() {
                 </div>
               </form>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Registrar consentimento do responsavel (aluno menor) */}
+      {consent && (
+        <div style={s.overlay}>
+          <div style={{...s.modal, maxWidth:'480px'}}>
+            <div style={s.modalHeader}>
+              <span style={{fontWeight:700,fontSize:'1.05rem'}}>Consentimento do responsável</span>
+              <button onClick={() => setConsent(null)} style={s.btnFechar}>✕</button>
+            </div>
+            <form onSubmit={registrarConsentimento} style={{padding:'22px'}}>
+              <p style={{color:'#555',fontSize:'.88rem',lineHeight:1.55,marginBottom:'14px'}}>
+                Aluno: <b>{consent.full_name || consent.email}</b>. Registre o consentimento só depois de receber o{' '}
+                <a href="/termo-responsavel" target="_blank" rel="noopener noreferrer" style={{color:'#1565c0',fontWeight:600}}>Termo de Consentimento do Responsável</a>{' '}
+                impresso e assinado. Guarde o papel com você.
+              </p>
+              <label style={s.label}>Nome completo do responsável</label>
+              <input value={formConsent.nome} onChange={e => setFormConsent(f => ({...f, nome: e.target.value}))} maxLength={120} required
+                style={{...s.input, width:'100%', marginBottom:'12px'}} />
+              <label style={s.label}>Vínculo com o aluno</label>
+              <input value={formConsent.vinculo} onChange={e => setFormConsent(f => ({...f, vinculo: e.target.value}))} maxLength={40} required
+                placeholder="Mãe, pai, avó, tutor..." style={{...s.input, width:'100%', marginBottom:'14px'}} />
+              <label style={{display:'flex',alignItems:'flex-start',gap:'10px',fontSize:'.88rem',cursor:'pointer',marginBottom:'16px'}}>
+                <input type="checkbox" checked={formConsent.recebido} onChange={e => setFormConsent(f => ({...f, recebido: e.target.checked}))}
+                  style={{width:'20px',height:'20px',flexShrink:0,marginTop:'2px'}} />
+                <span>Confirmo que recebi o termo <b>assinado</b> pelo responsável. Esta ação libera o chat e a foto deste aluno menor.</span>
+              </label>
+              <div style={{display:'flex',gap:'10px',justifyContent:'flex-end'}}>
+                <button type="button" onClick={() => setConsent(null)} style={s.btnCancelar}>Cancelar</button>
+                <button type="submit" disabled={salvandoConsent || !formConsent.recebido || !formConsent.nome.trim() || !formConsent.vinculo.trim()}
+                  style={{...s.btnPrimario, opacity:(salvandoConsent || !formConsent.recebido || !formConsent.nome.trim() || !formConsent.vinculo.trim()) ? .5 : 1}}>
+                  {salvandoConsent ? 'Registrando...' : 'Registrar consentimento'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

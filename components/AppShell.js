@@ -7,7 +7,8 @@ import Avatar from './Avatar'
 const ITENS_ALUNO = [
   { href: '/exercicios', icone: '📚', nome: 'Exercícios' },
   { href: '/mensagens', icone: '💬', nome: 'Mensagens' },
-  { href: '/perfil', icone: '👤', nome: 'Perfil' }
+  { href: '/perfil', icone: '👤', nome: 'Perfil' },
+  { href: '/meus-dados', icone: '🛡️', nome: 'Meus Dados' }
 ]
 const ITENS_PROFESSOR = [
   { href: '/exercicios', icone: '📚', nome: 'Exercícios' },
@@ -16,7 +17,8 @@ const ITENS_PROFESSOR = [
   { href: '/correcao', icone: '👥', nome: 'Painel de Alunos' },
   { href: '/controle-acessos', icone: '🔑', nome: 'Controle de Acessos' },
   { href: '/mensagens', icone: '💬', nome: 'Mensagens' },
-  { href: '/perfil', icone: '👤', nome: 'Perfil' }
+  { href: '/perfil', icone: '👤', nome: 'Perfil' },
+  { href: '/meus-dados', icone: '🛡️', nome: 'Meus Dados' }
 ]
 
 const CACHE = 'perfil_cache_v1'
@@ -73,6 +75,11 @@ export default function AppShell({ titulo, children }) {
     await supabase.auth.signOut()
     router.push('/')
   }
+
+  // Precisa aceitar os Termos e a Politica (versao vigente) antes de usar o sistema
+  useEffect(() => {
+    if (perfil && perfil.aceiteOk === false) router.replace('/aceite')
+  }, [perfil])
 
   const itens = professor ? ITENS_PROFESSOR : ITENS_ALUNO
   const nome = perfil?.nomeExibicao || perfil?.nomeCadastro || (perfil?.email ? perfil.email.split('@')[0] : '')

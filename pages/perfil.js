@@ -156,6 +156,11 @@ export default function Perfil() {
               <button type="submit" disabled={salvando} style={{ ...s.btnPrimario, marginTop: '18px', opacity: salvando ? .5 : 1 }}>
                 {salvando ? 'Salvando...' : 'Salvar perfil'}
               </button>
+              <p style={{ marginTop: '16px', fontSize: '.8rem', color: '#777' }}>
+                <a href="/privacidade" style={{ color: '#1565c0' }}>Política de Privacidade</a>{' · '}
+                <a href="/termos" style={{ color: '#1565c0' }}>Termos de Uso</a>{' · '}
+                <a href="/meus-dados" style={{ color: '#1565c0' }}>Meus Dados</a>
+              </p>
             </form>
           </div>
         )}

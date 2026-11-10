@@ -74,6 +74,9 @@ export default function Login() {
             </button>
           </form>
           <p style={s.rodape}>Não tem acesso? Entre em contato com o professor.</p>
+          <p style={s.rodape}>
+            <a href="/privacidade" style={{ color: '#1565c0' }}>Política de Privacidade</a>{' · '}<a href="/termos" style={{ color: '#1565c0' }}>Termos de Uso</a>
+          </p>
         </div>
       </div>
     </>
