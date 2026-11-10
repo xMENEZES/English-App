@@ -129,10 +129,12 @@ const CSS = `
   .sh-burger{display:none}
   .sh-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:250}
   .sh-backdrop.show{display:block}
-  .sh-item{display:flex;align-items:center;gap:14px;height:46px;padding:0 16px;width:100%;color:#fff;text-decoration:none;background:none;border:none;cursor:pointer;font:inherit;font-size:.95rem;white-space:nowrap;text-align:left;flex-shrink:0}
+  .sh-item{display:flex;align-items:center;gap:14px;height:48px;padding:0 12px;width:100%;color:#fff;text-decoration:none;background:none;border:none;cursor:pointer;font:inherit;font-size:.95rem;white-space:nowrap;text-align:left;flex-shrink:0}
   .sh-item:hover{background:rgba(255,255,255,.12)}
   .sh-item:focus-visible,.sh-perfil:focus-visible{outline:2px solid #f9a825;outline-offset:-2px}
-  .sh-item .sh-ic{width:24px;text-align:center;font-size:1.2rem;flex-shrink:0}
+  .sh-item .sh-ic{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;background:rgba(255,255,255,.92);border-radius:9px;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+  .sh-item.ativo .sh-ic{background:#fff;box-shadow:0 0 0 2px #f9a825}
+  .sh-toggle .sh-ic{background:none;box-shadow:none;font-size:1.3rem}
   .sh-item.ativo{background:rgba(255,255,255,.2);box-shadow:inset 4px 0 0 #f9a825;font-weight:700}
   .sh-tx{opacity:0;transition:opacity .15s ease;pointer-events:none}
   .sh-side.open .sh-tx{opacity:1;pointer-events:auto}
