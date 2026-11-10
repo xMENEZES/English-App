@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import { getTeacher, isUuid, meusAlunos } from '../../../lib/authz'
 import { VERSOES } from '../../../lib/lgpd/config'
+import { removerArquivos } from '../../../lib/armazenamento'
 
 // Classifica o aluno para liberar o chat:
 //  - adulto: { alunoId, menor: false }
@@ -28,6 +29,11 @@ export default async function handler(req, res) {
     if (respVinculo.length < 2 || respVinculo.length > 40) return res.status(400).json({ error: 'Informe o vínculo com o aluno (mãe, pai, tutor...)' })
     if (req.body?.termoRecebido !== true) return res.status(400).json({ error: 'Confirme que recebeu o termo assinado' })
   }
+  // Consentimento retirado/ausente: apaga tambem o termo digitalizado guardado
+  if (!registrar) {
+    const { data: atual } = await supabaseAdmin.from('classificacao_aluno').select('termo_arquivo_path').eq('aluno_id', alunoId).maybeSingle()
+    if (atual?.termo_arquivo_path) await removerArquivos('termos-assinados', [atual.termo_arquivo_path])
+  }
   const { error } = await supabaseAdmin.from('classificacao_aluno').upsert({
     aluno_id: alunoId,
     teacher_id: teacher.id,
@@ -38,6 +44,7 @@ export default async function handler(req, res) {
     responsavel_vinculo: registrar ? respVinculo : null,
     forma_coleta: registrar ? 'termo_assinado' : null,
     versao_termo: registrar ? VERSOES.consentimento : null,
+    ...(registrar ? {} : { termo_arquivo_path: null }),
     updated_at: new Date().toISOString()
   })
   if (error) return res.status(400).json({ error: error.message })

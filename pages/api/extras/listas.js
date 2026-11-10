@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import { getTeacher } from '../../../lib/authz'
 import { LIM, validarTitulo, validarUnidade, listaDoProfessor } from '../../../lib/extras'
+import { apagarAudiosDe } from '../../../lib/armazenamento'
 
 // CRUD das listas de exercicios do professor.
 export default async function handler(req, res) {
@@ -69,6 +70,7 @@ export default async function handler(req, res) {
   if (req.method === 'DELETE') {
     const lista = await listaDoProfessor(req.body?.id, teacher)
     if (!lista) return res.status(404).json({ error: 'Lista não encontrada' })
+    await apagarAudiosDe({ lista_id: lista.id })
     const { error } = await supabaseAdmin.from('listas_extras').delete().eq('id', lista.id)
     if (error) return res.status(400).json({ error: error.message })
     return res.status(200).json({ ok: true })

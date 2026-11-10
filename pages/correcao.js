@@ -235,7 +235,7 @@ export default function Correcao() {
                   <div key={i.id} style={{fontSize:'.85rem',padding:'6px 0',borderTop:'1px solid #f0f0f0',marginTop:'6px'}}>
                     <div style={{color:'#555',whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{i.enunciado}</div>
                     <div style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>
-                      <b>Resposta:</b> {i.resposta}{' '}
+                      <b>Resposta:</b> {i.audioUrl ? <audio controls preload="none" src={i.audioUrl} style={{verticalAlign:'middle',maxWidth:'100%'}} /> : (i.resposta ?? '(áudio)')}{' '}
                       {i.status === 'pendente'
                         ? <span style={{color:'#e65100'}}>⏳ aguardando correção</span>
                         : <span style={{color: i.correta ? '#2e7d32' : '#c62828'}}>{i.correta ? '✔ correta' : '✘ incorreta'}</span>}

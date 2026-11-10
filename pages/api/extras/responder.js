@@ -35,6 +35,7 @@ export default async function handler(req, res) {
     if (error) return res.status(400).json({ error: error.message })
     return res.status(200).json({ status: 'pendente' })
   }
+  if (ex.tipo === 'audio') return res.status(400).json({ error: 'Exercícios de áudio são enviados pela gravação de voz' })
   if (!TIPOS_AUTO.includes(ex.tipo)) return res.status(400).json({ error: 'Este tipo de exercício ainda não é suportado' })
 
   let correta

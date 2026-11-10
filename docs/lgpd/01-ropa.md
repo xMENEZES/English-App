@@ -5,7 +5,7 @@
 **Encarregado:** o próprio controlador (mesmo contato)
 **Sistema:** English Step By Step (https://english-step-by-step.vercel.app)
 **Titulares:** alunos (inclusive menores de idade) e o professor
-**Última atualização:** 10/11/2026
+**Última atualização:** 10/11/2026 (versão 2.0 dos documentos: inclui gravação de voz)
 
 ## Operações de tratamento
 
@@ -21,6 +21,8 @@
 | 8 | Consentimento do responsável | nome e vínculo do responsável, data, forma, versão do termo; termo assinado em papel | responsáveis de menores | Comprovar o consentimento | Art. 7º, II e VI | Supabase (metadados); papel com o controlador | Metadados no sistema: enquanto o aluno tiver acesso (apagados ao remover). Termo em papel: prazo para defesa de direitos (sugestão: 5 anos) **[REVISAR]** |
 | 9 | Aceite dos Termos/Política | versão, data | alunos, professor | Comprovar o aceite | Art. 7º, VI | Supabase | Enquanto a conta existir |
 | 10 | Solicitações do titular | tipo, descrição, resposta, datas | alunos | Atender direitos (art. 18) | Art. 7º, II | Supabase; professor | Enquanto a conta existir |
+| 12 | Resposta em áudio (gravação de voz) | arquivo de áudio (até 60 s), duração, data, correção e comentário do professor | alunos (inclusive menores) | Permitir que o professor ouça e corrija a fala | Consentimento — art. 7º, I; menores: art. 14, §1º (termo v2.0) | Supabase (Storage privado, link temporário); professor | 12 meses (limpeza diária); regravar apaga a anterior; apagada com o exercício/aluno |
+| 13 | Termo assinado digitalizado (opcional) | imagem/PDF do termo, que contém nome e documento do responsável | responsáveis | Comprovar o consentimento | Art. 7º, II e VI | Supabase (Storage privado, só o professor acessa) | Enquanto o aluno tiver acesso; apagado se o consentimento for retirado |
 | 11 | Registros técnicos | IP, navegador, horários | todos | Segurança e funcionamento | Legítimo interesse — art. 7º, IX **[REVISAR]** | Vercel, Supabase | Conforme os provedores |
 
 ## Operadores (suboperadores do controlador)
@@ -36,4 +38,4 @@ Os operadores são empresas dos EUA. Verificar o mecanismo (cláusulas contratua
 HTTPS e cabeçalhos de segurança; senhas com hash (Supabase Auth); autorização por papel no servidor e no banco (RLS); fotos em bucket privado com link temporário; correção de exercícios no servidor; limite de frequência de mensagens; remoção de dados ao excluir o aluno; política de senha forte; repositório sem segredos (chaves só em variáveis de ambiente).
 
 ## Funcionalidades NÃO ativas (exigem nova avaliação antes de ligar)
-Resposta por áudio; videochamada; transcrição automática de voz.
+Videochamada; transcrição automática de voz; identificação por voz. (A resposta por áudio está ativa desde a versão 2.0: a voz é apenas gravada e ouvida pelo professor, sem análise automática.)

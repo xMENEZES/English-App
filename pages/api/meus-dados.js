@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '../../lib/supabaseAdmin'
 import { isTeacher } from '../../lib/authz'
 import { getUsuario } from '../../lib/chat'
+import { linksTemporarios } from '../../lib/armazenamento'
 
 // Exportacao dos dados pessoais do proprio usuario (direito de acesso, art. 18 da LGPD).
 export default async function handler(req, res) {
@@ -14,11 +15,16 @@ export default async function handler(req, res) {
     supabaseAdmin.from('perfis_usuario').select('nome_exibicao, idade, foto_path, foto_atualizada_em, updated_at').eq('user_id', user.id).maybeSingle(),
     supabaseAdmin.from('classificacao_aluno').select('menor_idade, consentimento_em, responsavel_nome, responsavel_vinculo, forma_coleta, versao_termo, updated_at').eq('aluno_id', user.id).maybeSingle(),
     supabaseAdmin.from('exercise_results').select('unit_id, question_idx, question, user_answer, correct_answer, is_correct, answered_at').eq('user_id', user.id).order('answered_at').limit(LIM),
-    supabaseAdmin.from('resultados_extras').select('lista_id, enunciado, resposta, resposta_certa, correta, status, avaliacao, comentario, created_at, corrigido_em').eq('user_id', user.id).order('created_at').limit(LIM),
+    supabaseAdmin.from('resultados_extras').select('lista_id, enunciado, resposta, resposta_certa, correta, status, avaliacao, comentario, audio_path, audio_duracao, created_at, corrigido_em').eq('user_id', user.id).order('created_at').limit(LIM),
     supabaseAdmin.from('mensagens').select('conversa_id, texto, created_at').eq('autor_id', user.id).order('created_at').limit(LIM),
     supabaseAdmin.from('aceites_termos').select('versao_termos, versao_privacidade, aceito_em').eq('user_id', user.id).order('aceito_em'),
     supabaseAdmin.from('solicitacoes_titular').select('tipo, descricao, status, resposta, created_at, atendida_em').eq('user_id', user.id).order('created_at')
   ])
+
+  const linksAudio = await linksTemporarios('audios', (extras.data || []).map(r => r.audio_path))
+  const exerciciosProfessor = (extras.data || []).map(({ audio_path, ...r }) => ({
+    ...r, gravacao_de_voz_link_temporario_1h: audio_path ? (linksAudio[audio_path] || null) : null
+  }))
 
   const dados = {
     gerado_em: new Date().toISOString(),
@@ -31,7 +37,7 @@ export default async function handler(req, res) {
     } : null,
     classificacao_e_consentimento: classif.data || null,
     exercicios_das_unidades: unidades.data || [],
-    exercicios_do_professor: extras.data || [],
+    exercicios_do_professor: exerciciosProfessor,
     mensagens_enviadas: msgs.data || [],
     aceites_dos_termos: aceites.data || [],
     solicitacoes: solic.data || []

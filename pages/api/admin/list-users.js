@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   const [{ users, error }, { data: profiles }, { data: classif }] = await Promise.all([
     meusAlunos(teacher),
     supabaseAdmin.from('profiles').select('id, full_name').eq('role', 'student'),
-    supabaseAdmin.from('classificacao_aluno').select('aluno_id, menor_idade, consentimento_em').eq('teacher_id', teacher.id)
+    supabaseAdmin.from('classificacao_aluno').select('aluno_id, menor_idade, consentimento_em, versao_termo, termo_arquivo_path').eq('teacher_id', teacher.id)
   ])
   if (error) return res.status(400).json({ error: error.message })
 
@@ -42,6 +42,7 @@ export default async function handler(req, res) {
   const students = alunosLista
     .map(u => ({
       id: u.id, email: u.email, full_name: nameMap[u.id] || null, created_at: u.created_at, chat: statusChat(u.id),
+      termoConsentimento: classPor[u.id]?.versao_termo || null, temTermo: !!classPor[u.id]?.termo_arquivo_path,
       nomeExibicao: perfilUsr[u.id]?.nome_exibicao || null, idade: perfilUsr[u.id]?.idade ?? null, fotoUrl: fotoUrl[u.id] || null
     }))
     .sort((a, b) => (a.full_name || 'zzz').localeCompare(b.full_name || 'zzz'))

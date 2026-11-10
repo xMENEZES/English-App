@@ -20,7 +20,7 @@ export default function ControleAcessos() {
   const router = useRouter()
   const mobile = useMobile()
   const [consent, setConsent] = useState(null)   // aluno cujo consentimento esta sendo registrado
-  const [formConsent, setFormConsent] = useState({ nome: '', vinculo: '', recebido: false })
+  const [formConsent, setFormConsent] = useState({ nome: '', vinculo: '', recebido: false, arquivo: null })
   const [salvandoConsent, setSalvandoConsent] = useState(false)
 
   useEffect(() => {
@@ -90,7 +90,7 @@ export default function ControleAcessos() {
   const classificarAluno = async (aluno, valor) => {
     if (valor === 'nao_classificado') return
     const nome = aluno.full_name || aluno.email
-    if (valor === 'menor_consentido') { setFormConsent({ nome: '', vinculo: '', recebido: false }); setConsent(aluno); return }
+    if (valor === 'menor_consentido') { setFormConsent({ nome: '', vinculo: '', recebido: false, arquivo: null }); setConsent(aluno); return }
     const h = await headers()
     const body = { alunoId: aluno.id, menor: valor !== 'adulto', consentimento: valor === 'menor_consentido' }
     const r = await fetch('/api/admin/classificar', { method: 'POST', headers: h, body: JSON.stringify(body) })
@@ -103,6 +103,51 @@ export default function ControleAcessos() {
       setMsgGlobal({ tipo: 'err', texto: d.error || 'Erro ao classificar' })
     }
     setTimeout(() => setMsgGlobal({ tipo: '', texto: '' }), 4000)
+  }
+
+  // Termo assinado digitalizado (PDF/JPG/PNG): anexar e ver (bucket privado; so voce acessa)
+  const anexarTermo = async (aluno, arquivo) => {
+    if (!arquivo) return false
+    if (arquivo.size > 5 * 1024 * 1024) { setMsgGlobal({ tipo: 'err', texto: 'O arquivo do termo deve ter no máximo 5 MB.' }); return false }
+    const { data } = await supabase.auth.getSession()
+    const r = await fetch('/api/admin/termo-assinado?alunoId=' + aluno.id, {
+      method: 'POST', headers: { Authorization: `Bearer ${data?.session?.access_token}`, 'Content-Type': arquivo.type || 'application/octet-stream' }, body: arquivo
+    })
+    const d = await r.json().catch(() => ({}))
+    if (!r.ok) { setMsgGlobal({ tipo: 'err', texto: d.error || 'Erro ao anexar o termo' }); return false }
+    setDados(x => ({ ...x, students: x.students.map(a => a.id === aluno.id ? { ...a, temTermo: true } : a) }))
+    setMsgGlobal({ tipo: 'ok', texto: 'Termo assinado guardado com segurança.' })
+    setTimeout(() => setMsgGlobal({ tipo: '', texto: '' }), 4000)
+    return true
+  }
+
+  const verTermo = async (aluno) => {
+    const h = await headers()
+    const r = await fetch('/api/admin/termo-assinado?alunoId=' + aluno.id, { headers: h })
+    const d = await r.json().catch(() => ({}))
+    if (r.ok && d.url) window.open(d.url, '_blank', 'noopener,noreferrer')
+    else setMsgGlobal({ tipo: 'err', texto: d.error || 'Não foi possível abrir o termo' })
+  }
+
+  // Controles do termo de consentimento (so para menor com consentimento registrado)
+  const termoControles = (a) => {
+    if (a.chat !== 'menor_consentido') return null
+    const versaoMaior = parseInt(String(a.termoConsentimento || '0').split('.')[0], 10)
+    return (
+      <div style={{marginTop:'6px',display:'flex',gap:'6px',alignItems:'center',flexWrap:'wrap'}}>
+        {a.temTermo
+          ? <button onClick={() => verTermo(a)} style={s.btnMini}>📄 Ver termo</button>
+          : <label style={{...s.btnMini, cursor:'pointer'}}>📎 Anexar termo
+              <input type="file" accept="application/pdf,image/jpeg,image/png" style={{display:'none'}}
+                onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; anexarTermo(a, f) }} />
+            </label>}
+        {versaoMaior < 2 && (
+          <button onClick={() => { setFormConsent({ nome: '', vinculo: '', recebido: false, arquivo: null }); setConsent(a) }} style={{...s.btnMini, color:'#e65100', borderColor:'#ffcc80'}}
+            title="O termo antigo não cobre a gravação de voz">🎤 Renovar termo (v2.0)</button>
+        )}
+        <span style={{fontSize:'.72rem',color:'#888'}}>Termo v{a.termoConsentimento || '?'}</span>
+      </div>
+    )
   }
 
   const registrarConsentimento = async (e) => {
@@ -118,8 +163,10 @@ export default function ControleAcessos() {
     setSalvandoConsent(false)
     if (r.ok) {
       setDados(x => ({ ...x, students: x.students.map(a => a.id === consent.id ? { ...a, chat: 'menor_consentido' } : a) }))
-      setMsgGlobal({ tipo: 'ok', texto: `Consentimento registrado para ${consent.full_name || consent.email}. Chat e foto liberados.` })
+      const alunoCons = consent
+      setMsgGlobal({ tipo: 'ok', texto: `Consentimento registrado para ${alunoCons.full_name || alunoCons.email}. Chat, foto e gravação de voz liberados.` })
       setConsent(null)
+      if (formConsent.arquivo) await anexarTermo(alunoCons, formConsent.arquivo)
     } else {
       setMsgGlobal({ tipo: 'err', texto: d.error || 'Erro ao registrar o consentimento' })
     }
@@ -207,6 +254,7 @@ export default function ControleAcessos() {
                       style={{...s.selectChat, maxWidth:'100%', width:'100%', fontSize:'1rem', padding:'9px 10px', marginBottom:'10px', borderColor: (a.chat === 'adulto' || a.chat === 'menor_consentido') ? '#2e7d32' : '#ef9a9a'}}>
                       {OPCOES_CHAT.map(o => <option key={o.v} value={o.v} disabled={o.v === 'nao_classificado'}>{o.t}</option>)}
                     </select>
+                    {termoControles(a)}
                     <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
                       <button onClick={() => redefinirSenha(a.email, a.full_name)} style={s.btnReset}>🔑 Redefinir Senha</button>
                       <button onClick={() => setConfirmacao({ userId: a.id, nome: a.full_name, email: a.email })} style={s.btnRemover}>🗑 Remover Acesso</button>
@@ -242,6 +290,7 @@ export default function ControleAcessos() {
                           style={{...s.selectChat, borderColor: (a.chat === 'adulto' || a.chat === 'menor_consentido') ? '#2e7d32' : '#ef9a9a'}}>
                           {OPCOES_CHAT.map(o => <option key={o.v} value={o.v} disabled={o.v === 'nao_classificado'}>{o.t}</option>)}
                         </select>
+                        {termoControles(a)}
                       </td>
                       <td style={{...s.td,textAlign:'center'}}>
                         <div style={{display:'flex',gap:'8px',justifyContent:'center',flexWrap:'wrap'}}>
@@ -320,10 +369,14 @@ export default function ControleAcessos() {
               <label style={s.label}>Vínculo com o aluno</label>
               <input value={formConsent.vinculo} onChange={e => setFormConsent(f => ({...f, vinculo: e.target.value}))} maxLength={40} required
                 placeholder="Mãe, pai, avó, tutor..." style={{...s.input, width:'100%', marginBottom:'14px'}} />
+              <label style={s.label}>Termo assinado digitalizado (opcional, PDF/JPG/PNG até 5 MB)</label>
+              <input type="file" accept="application/pdf,image/jpeg,image/png" onChange={e => setFormConsent(f => ({...f, arquivo: e.target.files?.[0] || null}))}
+                style={{width:'100%',marginBottom:'6px',fontSize:'.9rem'}} />
+              <div style={{fontSize:'.76rem',color:'#888',marginBottom:'14px'}}>Fica em área privada, visível só para você. O termo contém o documento do responsável: guarde com cuidado. Também pode guardar apenas o papel.</div>
               <label style={{display:'flex',alignItems:'flex-start',gap:'10px',fontSize:'.88rem',cursor:'pointer',marginBottom:'16px'}}>
                 <input type="checkbox" checked={formConsent.recebido} onChange={e => setFormConsent(f => ({...f, recebido: e.target.checked}))}
                   style={{width:'20px',height:'20px',flexShrink:0,marginTop:'2px'}} />
-                <span>Confirmo que recebi o termo <b>assinado</b> pelo responsável. Esta ação libera o chat e a foto deste aluno menor.</span>
+                <span>Confirmo que recebi o termo <b>assinado</b> pelo responsável. Esta ação libera o chat, a foto e a gravação de voz deste aluno menor (termo versão 2.0).</span>
               </label>
               <div style={{display:'flex',gap:'10px',justifyContent:'flex-end'}}>
                 <button type="button" onClick={() => setConsent(null)} style={s.btnCancelar}>Cancelar</button>
@@ -383,6 +436,7 @@ const s = {
   btnPrimario: {background:'#1565c0',color:'#fff',border:'none',borderRadius:'9px',padding:'9px 20px',cursor:'pointer',fontSize:'.88rem',fontWeight:700},
   btnSec: {background:'rgba(255,255,255,.2)',border:'1px solid rgba(255,255,255,.5)',color:'#fff',padding:'5px 12px',borderRadius:'8px',cursor:'pointer',fontSize:'.8rem'},
   selectChat: {border:'2px solid #e0e0e0',borderRadius:'8px',padding:'6px 8px',fontSize:'.82rem',background:'#fff',maxWidth:'230px'},
+  btnMini: {background:'#fff',color:'#1565c0',border:'1px solid #90caf9',borderRadius:'7px',padding:'4px 10px',fontSize:'.76rem',fontWeight:600,display:'inline-block'},
   btnReset: {background:'#e3f2fd',color:'#1565c0',border:'1px solid #90caf9',borderRadius:'7px',padding:'6px 12px',cursor:'pointer',fontSize:'.82rem',fontWeight:600,whiteSpace:'nowrap'},
   btnRemover: {background:'#ffebee',color:'#c62828',border:'1px solid #ef9a9a',borderRadius:'7px',padding:'6px 12px',cursor:'pointer',fontSize:'.82rem',fontWeight:600,whiteSpace:'nowrap'},
   btnCancelar: {background:'#f5f5f5',color:'#555',border:'1px solid #ddd',borderRadius:'8px',padding:'9px 18px',cursor:'pointer',fontSize:'.88rem'},
