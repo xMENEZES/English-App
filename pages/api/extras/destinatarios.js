@@ -23,9 +23,9 @@ export default async function handler(req, res) {
     supabaseAdmin.from('turmas').select('id').eq('teacher_id', teacher.id)
   ])
   if (le) return res.status(400).json({ error: le.message })
-  const meusAlunos = new Set(users.map(u => u.id))
+  const meusIds = new Set(users.map(u => u.id))
   const minhasT = new Set((minhasTurmas || []).map(t => t.id))
-  if (!alunos.every(id => meusAlunos.has(id)) || !turmas.every(id => minhasT.has(id)))
+  if (!alunos.every(id => meusIds.has(id)) || !turmas.every(id => minhasT.has(id)))
     return res.status(403).json({ error: 'Há alunos ou turmas que não pertencem a você' })
 
   const { error: de } = await supabaseAdmin.from('listas_extras_destinatarios').delete().eq('lista_id', lista.id)
