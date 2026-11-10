@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabaseClient'
 import { UNIDADES } from '../lib/unidades'
 import Head from 'next/head'
-import AppShell from '../components/AppShell'
 
 const TIPOS = [
   { v: 'mc', t: 'Múltipla escolha' },
@@ -173,7 +172,7 @@ export default function MeusExercicios() {
   if (carregando) return <div style={s.loading}>Carregando...</div>
 
   return (
-    <AppShell titulo="📝 Meus Exercícios">
+    <>
       <Head><title>English Step By Step - Meus Exercícios</title></Head>
 
       <div style={s.page}>
@@ -354,12 +353,12 @@ export default function MeusExercicios() {
           </div>
         )}
       </div>
-    </AppShell>
+    </>
   )
 }
 
 const s = {
-  loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Segoe UI,sans-serif', color: '#0d2157' },
+  loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', fontFamily: 'Segoe UI,sans-serif', color: '#0d2157' },
   header: { background: 'linear-gradient(135deg,#0d2157,#1565c0)', color: '#fff', padding: '13px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,0,0,.2)' },
   page: { maxWidth: '1100px', margin: '0 auto', padding: '22px' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: '18px', alignItems: 'start' },
@@ -394,3 +393,5 @@ const s = {
   btnOk: { background: '#e8f5e9', color: '#2e7d32', border: '1px solid #a5d6a7', borderRadius: '9px', padding: '8px 16px', cursor: 'pointer', fontWeight: 700, fontSize: '.88rem' },
   btnMelhorar: { background: '#fff3e0', color: '#e65100', border: '1px solid #ffcc80', borderRadius: '9px', padding: '8px 16px', cursor: 'pointer', fontWeight: 700, fontSize: '.88rem' },
 }
+
+MeusExercicios.shellTitle = '📝 Meus Exercícios'

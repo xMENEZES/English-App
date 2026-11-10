@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
-import { isTeacher, listAllUsers, alunosDoProfessor } from '../../../lib/authz'
+import { isTeacher, meusAlunos } from '../../../lib/authz'
 import { getUsuario } from '../../../lib/chat'
 
 const nomeDe = (p, fallback) => p?.full_name?.trim() || fallback
@@ -26,12 +26,12 @@ export default async function handler(req, res) {
 
   if (isTeacher(user)) {
     const [{ users, error }, { data: turmas }, { data: classif }] = await Promise.all([
-      listAllUsers(),
+      meusAlunos(user),
       supabaseAdmin.from('turmas').select('id, nome').eq('teacher_id', user.id).order('nome'),
       supabaseAdmin.from('classificacao_aluno').select('aluno_id, menor_idade, consentimento_em').eq('teacher_id', user.id)
     ])
     if (error) return res.status(400).json({ error: error.message })
-    const alunos = alunosDoProfessor(users, user)
+    const alunos = users
     const ids = alunos.map(a => a.id)
     const classPor = Object.fromEntries((classif || []).map(c => [c.aluno_id, c]))
 

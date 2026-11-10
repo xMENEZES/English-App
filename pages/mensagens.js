@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabaseClient'
 import Head from 'next/head'
-import AppShell from '../components/AppShell'
 
 const MAX = 2000
 
@@ -153,7 +152,7 @@ export default function Mensagens() {
   const mostrarConversa = !mobile || !!abertaId
 
   return (
-    <AppShell titulo="💬 Mensagens">
+    <>
       <Head><title>English Step By Step - Mensagens</title></Head>
 
       {dados.bloqueado ? (
@@ -243,12 +242,12 @@ export default function Mensagens() {
           )}
         </div>
       )}
-    </AppShell>
+    </>
   )
 }
 
 const s = {
-  loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Segoe UI,sans-serif', color: '#0d2157' },
+  loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', fontFamily: 'Segoe UI,sans-serif', color: '#0d2157' },
   header: { background: 'linear-gradient(135deg,#0d2157,#1565c0)', color: '#fff', padding: '13px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,0,0,.2)' },
   btnSec: { background: 'rgba(255,255,255,.2)', border: '1px solid rgba(255,255,255,.5)', color: '#fff', padding: '5px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '.8rem' },
   page: { maxWidth: '700px', margin: '0 auto', padding: '22px' },
@@ -278,3 +277,5 @@ const s = {
   vazio: { color: '#888', fontSize: '.88rem', textAlign: 'center', padding: '14px' },
   vazioCentro: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888', fontSize: '.95rem', padding: '20px', textAlign: 'center' },
 }
+
+Mensagens.shellTitle = '💬 Mensagens'

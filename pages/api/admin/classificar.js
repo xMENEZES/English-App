@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
-import { getTeacher, isUuid, listAllUsers, alunosDoProfessor } from '../../../lib/authz'
+import { getTeacher, isUuid, meusAlunos } from '../../../lib/authz'
 
 // Classifica o aluno para liberar o chat:
 //  - adulto: { alunoId, menor: false }
@@ -13,9 +13,9 @@ export default async function handler(req, res) {
   const { alunoId, menor, consentimento } = req.body || {}
   if (!isUuid(alunoId) || typeof menor !== 'boolean') return res.status(400).json({ error: 'Dados inválidos' })
 
-  const { users, error: le } = await listAllUsers()
+  const { users, error: le } = await meusAlunos(teacher)
   if (le) return res.status(400).json({ error: le.message })
-  if (!alunosDoProfessor(users, teacher).some(u => u.id === alunoId))
+  if (!users.some(u => u.id === alunoId))
     return res.status(403).json({ error: 'Este aluno não pertence a você' })
 
   const registrar = menor && consentimento === true

@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
-import { getTeacher, listAllUsers, alunosDoProfessor, limiteDeVagas } from '../../../lib/authz'
+import { getTeacher, meusAlunos, limiteDeVagas } from '../../../lib/authz'
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).end()
@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   const slotLimit = limiteDeVagas(teacher)
   // As 3 consultas sao independentes: rodam juntas para reduzir o tempo de resposta
   const [{ users, error }, { data: profiles }, { data: classif }] = await Promise.all([
-    listAllUsers(),
+    meusAlunos(teacher),
     supabaseAdmin.from('profiles').select('id, full_name').eq('role', 'student'),
     supabaseAdmin.from('classificacao_aluno').select('aluno_id, menor_idade, consentimento_em').eq('teacher_id', teacher.id)
   ])
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     return c.consentimento_em ? 'menor_consentido' : 'menor_sem_consentimento'
   }
 
-  const alunosLista = alunosDoProfessor(users, teacher)
+  const alunosLista = users
   const { data: perfisUsr } = alunosLista.length
     ? await supabaseAdmin.from('perfis_usuario').select('user_id, nome_exibicao, idade, foto_path').in('user_id', alunosLista.map(a => a.id))
     : { data: [] }

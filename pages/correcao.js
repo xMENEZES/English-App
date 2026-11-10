@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabaseClient'
 import Head from 'next/head'
-import AppShell from '../components/AppShell'
 import Avatar from '../components/Avatar'
 
 export default function Correcao() {
@@ -99,7 +98,7 @@ export default function Correcao() {
   if (carregando) return <div style={s.loading}>Carregando...</div>
 
   return (
-    <AppShell titulo="👥 Painel de Alunos">
+    <>
       <Head><title>English Step By Step - Painel de Alunos</title></Head>
 
       <div style={s.page}>
@@ -249,12 +248,12 @@ export default function Correcao() {
           </div>
         )}
       </div>
-    </AppShell>
+    </>
   )
 }
 
 const s = {
-  loading: {display:'flex',justifyContent:'center',alignItems:'center',height:'100vh',fontFamily:'Segoe UI,sans-serif',color:'#0d2157'},
+  loading: {display:'flex',justifyContent:'center',alignItems:'center',height:'60vh',fontFamily:'Segoe UI,sans-serif',color:'#0d2157'},
   header: {background:'linear-gradient(135deg,#0d2157,#1565c0)',color:'#fff',padding:'10px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:100,boxShadow:'0 2px 8px rgba(0,0,0,.2)',flexWrap:'wrap',gap:'6px'},
   page: {maxWidth:'900px',margin:'0 auto',padding:'16px',overflowX:'hidden'},
   card: {background:'#fff',borderRadius:'14px',padding:'22px',marginBottom:'20px',boxShadow:'0 2px 8px rgba(0,0,0,.08)'},
@@ -277,3 +276,5 @@ const s = {
   btnSecundario: {background:'rgba(255,255,255,.2)',border:'1px solid rgba(255,255,255,.6)',color:'#fff',padding:'6px 12px',borderRadius:'8px',cursor:'pointer',fontSize:'.78rem',fontWeight:600,whiteSpace:'nowrap'},
   btnSair: {background:'rgba(255,255,255,.2)',border:'1px solid rgba(255,255,255,.6)',color:'#fff',padding:'6px 12px',borderRadius:'8px',cursor:'pointer',fontSize:'.78rem',fontWeight:600,whiteSpace:'nowrap'},
 }
+
+Correcao.shellTitle = '👥 Painel de Alunos'

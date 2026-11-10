@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabaseClient'
-import AppShell from '../components/AppShell'
 import Avatar from '../components/Avatar'
 import Head from 'next/head'
 
@@ -116,7 +115,7 @@ export default function Perfil() {
   const nomeMostrado = nome || perfil?.nomeCadastro || perfil?.email || ''
 
   return (
-    <AppShell titulo="👤 Meu Perfil">
+    <>
       <Head><title>English Step By Step - Perfil</title></Head>
       <div style={s.page}>
         {msg.texto && <div style={{ ...s.msg, ...(msg.tipo === 'ok' ? s.msgOk : s.msgErr) }}>{msg.texto}</div>}
@@ -161,7 +160,7 @@ export default function Perfil() {
           </div>
         )}
       </div>
-    </AppShell>
+    </>
   )
 }
 
@@ -182,3 +181,5 @@ const s = {
   btnPrimario: { background: '#1565c0', color: '#fff', border: 'none', borderRadius: '9px', padding: '10px 20px', cursor: 'pointer', fontSize: '.92rem', fontWeight: 700 },
   btnRemover: { background: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a', borderRadius: '9px', padding: '8px 16px', cursor: 'pointer', fontSize: '.85rem', fontWeight: 600 },
 }
+
+Perfil.shellTitle = '👤 Meu Perfil'

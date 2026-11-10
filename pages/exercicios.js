@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabaseClient'
 import Head from 'next/head'
 import Script from 'next/script'
-import AppShell from '../components/AppShell'
 
 export default function Exercicios() {
   const [sessao, setSessao] = useState(null)
@@ -102,19 +101,19 @@ export default function Exercicios() {
   }
 
   if (carregando) return (
-    <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh',background:'#f0f4f8',fontFamily:'Segoe UI,sans-serif',color:'#0d2157',fontSize:'1.1rem'}}>
+    <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'60vh',background:'#f0f4f8',fontFamily:'Segoe UI,sans-serif',color:'#0d2157',fontSize:'1.1rem'}}>
       Carregando...
     </div>
   )
 
   return (
-    <AppShell titulo="📚 Exercícios">
+    <>
       <Head><title>English Step By Step - Exercicios</title></Head>
       <style dangerouslySetInnerHTML={{__html: EXERCISES_CSS}} />
       <div dangerouslySetInnerHTML={{__html: EXERCISES_BODY}} />
       <Script src="/exercises.js" strategy="afterInteractive" />
       <Script src="/extras.js" strategy="afterInteractive" />
-    </AppShell>
+    </>
   )
 }
 
@@ -234,3 +233,4 @@ const EXERCISES_BODY = `
 <div id="unitContainer"></div>
 `
 
+Exercicios.shellTitle = '📚 Exercícios'

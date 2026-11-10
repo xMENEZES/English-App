@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
-import { getTeacher, listAllUsers, alunosDoProfessor, limiteDeVagas } from '../../../lib/authz'
+import { getTeacher, meusAlunos, limiteDeVagas } from '../../../lib/authz'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://english-step-by-step.vercel.app'
@@ -13,9 +13,9 @@ export default async function handler(req, res) {
   if (!email || !EMAIL_RE.test(email)) return res.status(400).json({ error: 'Email inválido' })
 
   const slotLimit = limiteDeVagas(teacher)
-  const { users, error: le } = await listAllUsers()
+  const { users, error: le } = await meusAlunos(teacher)
   if (le) return res.status(400).json({ error: le.message })
-  if (alunosDoProfessor(users, teacher).length >= slotLimit)
+  if (users.length >= slotLimit)
     return res.status(400).json({ error: `Limite de ${slotLimit} acessos atingido.` })
 
   const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
