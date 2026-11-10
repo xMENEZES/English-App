@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
-import { getTeacher, isUuid, listAllUsers, alunosDoProfessor } from '../../../lib/authz'
+import { getTeacher, isUuid, meusAlunos } from '../../../lib/authz'
 import { ultimoPorExercicio } from '../../../lib/extras'
 
 // Visao do PROFESSOR: respostas dos alunos nas suas listas.
@@ -17,9 +17,9 @@ export default async function handler(req, res) {
 
   if (req.query.alunoId) {
     if (!isUuid(req.query.alunoId)) return res.status(400).json({ error: 'Aluno inválido' })
-    const { users, error } = await listAllUsers()
+    const { users, error } = await meusAlunos(teacher)
     if (error) return res.status(400).json({ error: error.message })
-    if (!alunosDoProfessor(users, teacher).some(u => u.id === req.query.alunoId)) return res.status(403).json({ error: 'Este aluno não pertence a você' })
+    if (!users.some(u => u.id === req.query.alunoId)) return res.status(403).json({ error: 'Este aluno não pertence a você' })
     const { data: rs } = await supabaseAdmin.from('resultados_extras')
       .select('id, exercicio_id, lista_id, enunciado, resposta, resposta_certa, correta, status, avaliacao, comentario, created_at')
       .eq('user_id', req.query.alunoId).in('lista_id', ids).order('created_at', { ascending: false })
@@ -39,8 +39,8 @@ export default async function handler(req, res) {
   if (req.query.pendentes) {
     const { data: rs } = await supabaseAdmin.from('resultados_extras')
       .select('id, lista_id, user_id, enunciado, resposta, created_at').in('lista_id', ids).eq('status', 'pendente').order('created_at')
-    const { users } = await listAllUsers()
-    const alunos = alunosDoProfessor(users || [], teacher)
+    const { users } = await meusAlunos(teacher)
+    const alunos = users || []
     const ids2 = alunos.map(a => a.id)
     const { data: perfis } = ids2.length ? await supabaseAdmin.from('profiles').select('id, full_name').in('id', ids2) : { data: [] }
     const nome = {}

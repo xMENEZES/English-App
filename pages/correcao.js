@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabaseClient'
 import Head from 'next/head'
+import Avatar from '../components/Avatar'
 
 export default function Correcao() {
   const [sessao, setSessao] = useState(null)
@@ -99,16 +100,6 @@ export default function Correcao() {
   return (
     <>
       <Head><title>English Step By Step - Painel de Alunos</title></Head>
-      <div style={s.header}>
-        <span style={{fontWeight:700,fontSize:'1rem'}}>👥 Painel de Alunos</span>
-        <div style={{display:'flex',gap:'10px',alignItems:'center'}}>
-          <button onClick={() => router.push('/turmas')} style={s.btnSecundario}>🏫 Turmas</button>
-          <button onClick={() => router.push('/mensagens')} style={s.btnSecundario}>💬 Mensagens</button>
-          <button onClick={() => router.push('/controle-acessos')} style={s.btnSecundario}>🔑 Controle de Acessos</button>
-          <button onClick={() => router.push('/exercicios')} style={s.btnSecundario}>Ver Exercícios</button>
-          <button onClick={sair} style={s.btnSair}>Sair</button>
-        </div>
-      </div>
 
       <div style={s.page}>
         {/* Seletor de aluno */}
@@ -121,7 +112,7 @@ export default function Correcao() {
               {alunos.map(a => (
                 <button key={a.id} onClick={() => selecionarAluno(a)}
                   style={{...s.alunoBtn, ...(alunoSel?.id===a.id ? s.alunoBtnAtivo : {})}}>
-                  <span style={s.alunoIco}>👤</span>
+                  <Avatar foto={a.fotoUrl} nome={a.full_name} tamanho={36} />
                   <span style={s.alunoTextos}>
                     <span style={{fontWeight:alunoSel?.id===a.id?700:600}}>{a.full_name}</span>
                     {a.full_name !== a.email && <span style={s.alunoEmail}>{a.email}</span>}
@@ -262,7 +253,7 @@ export default function Correcao() {
 }
 
 const s = {
-  loading: {display:'flex',justifyContent:'center',alignItems:'center',height:'100vh',fontFamily:'Segoe UI,sans-serif',color:'#0d2157'},
+  loading: {display:'flex',justifyContent:'center',alignItems:'center',height:'60vh',fontFamily:'Segoe UI,sans-serif',color:'#0d2157'},
   header: {background:'linear-gradient(135deg,#0d2157,#1565c0)',color:'#fff',padding:'10px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:100,boxShadow:'0 2px 8px rgba(0,0,0,.2)',flexWrap:'wrap',gap:'6px'},
   page: {maxWidth:'900px',margin:'0 auto',padding:'16px',overflowX:'hidden'},
   card: {background:'#fff',borderRadius:'14px',padding:'22px',marginBottom:'20px',boxShadow:'0 2px 8px rgba(0,0,0,.08)'},
@@ -285,3 +276,5 @@ const s = {
   btnSecundario: {background:'rgba(255,255,255,.2)',border:'1px solid rgba(255,255,255,.6)',color:'#fff',padding:'6px 12px',borderRadius:'8px',cursor:'pointer',fontSize:'.78rem',fontWeight:600,whiteSpace:'nowrap'},
   btnSair: {background:'rgba(255,255,255,.2)',border:'1px solid rgba(255,255,255,.6)',color:'#fff',padding:'6px 12px',borderRadius:'8px',cursor:'pointer',fontSize:'.78rem',fontWeight:600,whiteSpace:'nowrap'},
 }
+
+Correcao.shellTitle = '👥 Painel de Alunos'

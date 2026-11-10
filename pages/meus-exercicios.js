@@ -174,15 +174,6 @@ export default function MeusExercicios() {
   return (
     <>
       <Head><title>English Step By Step - Meus Exercícios</title></Head>
-      <div style={s.header}>
-        <span style={{ fontWeight: 700, fontSize: '1rem' }}>📝 Meus Exercícios</span>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button onClick={() => router.push('/correcao')} style={s.btnSec}>👥 Alunos</button>
-          <button onClick={() => router.push('/turmas')} style={s.btnSec}>🏫 Turmas</button>
-          <button onClick={() => router.push('/exercicios')} style={s.btnSec}>📚 Exercícios</button>
-          <button onClick={sair} style={s.btnSec}>Sair</button>
-        </div>
-      </div>
 
       <div style={s.page}>
         {msg.texto && <div style={{ ...s.msg, ...(msg.tipo === 'ok' ? s.msgOk : s.msgErr) }}>{msg.texto}</div>}
@@ -367,7 +358,7 @@ export default function MeusExercicios() {
 }
 
 const s = {
-  loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Segoe UI,sans-serif', color: '#0d2157' },
+  loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', fontFamily: 'Segoe UI,sans-serif', color: '#0d2157' },
   header: { background: 'linear-gradient(135deg,#0d2157,#1565c0)', color: '#fff', padding: '13px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,0,0,.2)' },
   page: { maxWidth: '1100px', margin: '0 auto', padding: '22px' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: '18px', alignItems: 'start' },
@@ -376,7 +367,7 @@ const s = {
   vazio: { color: '#888', fontSize: '.9rem' },
   label: { display: 'block', fontSize: '.85rem', fontWeight: 600, color: '#333', marginBottom: '6px' },
   sub: { fontSize: '.78rem', color: '#777', margin: '8px 0 4px', fontWeight: 600 },
-  input: { border: '2px solid #e0e0e0', borderRadius: '9px', padding: '9px 12px', fontSize: '.95rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' },
+  input: { border: '2px solid #e0e0e0', borderRadius: '9px', padding: '9px 12px', fontSize: '1rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' },
   caixa: { maxHeight: '140px', overflowY: 'auto', border: '2px solid #f0f0f0', borderRadius: '10px', padding: '6px' },
   linha: { display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 8px', cursor: 'pointer', fontSize: '.9rem' },
   chk: { width: '18px', height: '18px', flexShrink: 0 },
@@ -402,3 +393,5 @@ const s = {
   btnOk: { background: '#e8f5e9', color: '#2e7d32', border: '1px solid #a5d6a7', borderRadius: '9px', padding: '8px 16px', cursor: 'pointer', fontWeight: 700, fontSize: '.88rem' },
   btnMelhorar: { background: '#fff3e0', color: '#e65100', border: '1px solid #ffcc80', borderRadius: '9px', padding: '8px 16px', cursor: 'pointer', fontWeight: 700, fontSize: '.88rem' },
 }
+
+MeusExercicios.shellTitle = '📝 Meus Exercícios'

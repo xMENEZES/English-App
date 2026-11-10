@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabaseClient'
 import Head from 'next/head'
+import Avatar from '../components/Avatar'
 
 export default function Turmas() {
   const [carregando, setCarregando] = useState(true)
@@ -109,16 +110,6 @@ export default function Turmas() {
   return (
     <>
       <Head><title>English Step By Step - Turmas</title></Head>
-      <div style={s.header}>
-        <span style={{ fontWeight: 700, fontSize: '1rem' }}>🏫 Turmas</span>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button onClick={() => router.push('/correcao')} style={s.btnSec}>👥 Painel de Alunos</button>
-          <button onClick={() => router.push('/mensagens')} style={s.btnSec}>💬 Mensagens</button>
-          <button onClick={() => router.push('/controle-acessos')} style={s.btnSec}>🔑 Acessos</button>
-          <button onClick={() => router.push('/exercicios')} style={s.btnSec}>📚 Exercícios</button>
-          <button onClick={sair} style={s.btnSec}>Sair</button>
-        </div>
-      </div>
 
       <div style={s.page}>
         {msg.texto && (
@@ -169,6 +160,7 @@ export default function Turmas() {
                     <label key={a.id} style={s.alunoLinha}>
                       <input type="checkbox" checked={marcados.includes(a.id)} onChange={() => alternar(a.id)}
                         style={{ width: '18px', height: '18px', flexShrink: 0 }} />
+                      <Avatar foto={a.fotoUrl} nome={a.nome} tamanho={30} />
                       <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0, overflowWrap: 'anywhere' }}>
                         <span style={{ fontWeight: 600 }}>{a.nome}</span>
                         {a.nome !== a.email && <span style={{ fontSize: '.78rem', color: '#888' }}>{a.email}</span>}
@@ -196,7 +188,7 @@ export default function Turmas() {
 }
 
 const s = {
-  loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Segoe UI,sans-serif', color: '#0d2157' },
+  loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', fontFamily: 'Segoe UI,sans-serif', color: '#0d2157' },
   header: { background: 'linear-gradient(135deg,#0d2157,#1565c0)', color: '#fff', padding: '13px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,0,0,.2)' },
   page: { maxWidth: '1000px', margin: '0 auto', padding: '22px' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '18px', alignItems: 'start' },
@@ -218,3 +210,5 @@ const s = {
   btnFechar: { background: '#f5f5f5', color: '#555', border: '1px solid #ddd', borderRadius: '9px', padding: '9px 16px', cursor: 'pointer', fontSize: '.88rem' },
   btnRemover: { background: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a', borderRadius: '9px', padding: '9px 16px', cursor: 'pointer', fontSize: '.88rem', fontWeight: 600 },
 }
+
+Turmas.shellTitle = '🏫 Turmas'

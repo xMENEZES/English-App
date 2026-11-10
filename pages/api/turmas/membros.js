@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
-import { getTeacher, isUuid, listAllUsers, alunosDoProfessor } from '../../../lib/authz'
+import { getTeacher, isUuid, meusAlunos } from '../../../lib/authz'
 
 // Define o conjunto COMPLETO de alunos de uma turma (adiciona e remove conforme a lista).
 export default async function handler(req, res) {
@@ -15,9 +15,9 @@ export default async function handler(req, res) {
   if (!turma || turma.teacher_id !== teacher.id) return res.status(404).json({ error: 'Turma não encontrada' })
 
   // Só alunos convidados por este professor podem entrar na turma
-  const { users, error: le } = await listAllUsers()
+  const { users, error: le } = await meusAlunos(teacher)
   if (le) return res.status(400).json({ error: le.message })
-  const meus = new Set(alunosDoProfessor(users, teacher).map(u => u.id))
+  const meus = new Set(users.map(u => u.id))
   const desejados = [...new Set(alunoIds)]
   if (!desejados.every(id => meus.has(id))) return res.status(403).json({ error: 'Há alunos que não pertencem a você' })
 

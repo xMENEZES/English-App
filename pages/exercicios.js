@@ -101,7 +101,7 @@ export default function Exercicios() {
   }
 
   if (carregando) return (
-    <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh',background:'#f0f4f8',fontFamily:'Segoe UI,sans-serif',color:'#0d2157',fontSize:'1.1rem'}}>
+    <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'60vh',background:'#f0f4f8',fontFamily:'Segoe UI,sans-serif',color:'#0d2157',fontSize:'1.1rem'}}>
       Carregando...
     </div>
   )
@@ -110,34 +110,6 @@ export default function Exercicios() {
     <>
       <Head><title>English Step By Step - Exercicios</title></Head>
       <style dangerouslySetInnerHTML={{__html: EXERCISES_CSS}} />
-      <div style={{background:'#0a1845',color:'#fff',padding:'7px 12px',display:'flex',justifyContent:'space-between',alignItems:'center',fontSize:'.75rem',flexWrap:'wrap',gap:'4px'}}>
-        <span>Logado como: <strong>{sessao.user.email}</strong></span>
-        <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
-          {sessao.user.app_metadata?.role === 'teacher' && (<>
-            <button onClick={() => router.push('/correcao')}
-              style={{background:'rgba(255,255,255,.25)',border:'1px solid rgba(255,255,255,.7)',color:'#fff',padding:'4px 14px',borderRadius:'20px',cursor:'pointer',fontSize:'.8rem',fontWeight:600}}>
-              👥 Painel de Alunos
-            </button>
-            <button onClick={() => router.push('/controle-acessos')}
-              style={{background:'rgba(255,255,255,.25)',border:'1px solid rgba(255,255,255,.7)',color:'#fff',padding:'4px 14px',borderRadius:'20px',cursor:'pointer',fontSize:'.8rem',fontWeight:600}}>
-              🔑 Controle de Acessos
-            </button>
-            <button onClick={() => router.push('/turmas')}
-              style={{background:'rgba(255,255,255,.25)',border:'1px solid rgba(255,255,255,.7)',color:'#fff',padding:'4px 14px',borderRadius:'20px',cursor:'pointer',fontSize:'.8rem',fontWeight:600}}>
-              🏫 Turmas
-            </button>
-            <button onClick={() => router.push('/meus-exercicios')}
-              style={{background:'rgba(255,255,255,.25)',border:'1px solid rgba(255,255,255,.7)',color:'#fff',padding:'4px 14px',borderRadius:'20px',cursor:'pointer',fontSize:'.8rem',fontWeight:600}}>
-              📝 Meus Exercícios
-            </button>
-          </>)}
-          <button onClick={() => router.push('/mensagens')}
-            style={{background:'rgba(255,255,255,.25)',border:'1px solid rgba(255,255,255,.7)',color:'#fff',padding:'4px 14px',borderRadius:'20px',cursor:'pointer',fontSize:'.8rem',fontWeight:600}}>
-            💬 Mensagens
-          </button>
-          <button onClick={sair} style={{background:'rgba(255,255,255,.18)',border:'1px solid rgba(255,255,255,.5)',color:'#fff',padding:'4px 14px',borderRadius:'20px',cursor:'pointer',fontSize:'.8rem'}}>Sair</button>
-        </div>
-      </div>
       <div dangerouslySetInnerHTML={{__html: EXERCISES_BODY}} />
       <Script src="/exercises.js" strategy="afterInteractive" />
       <Script src="/extras.js" strategy="afterInteractive" />
@@ -182,7 +154,7 @@ const EXERCISES_CSS = `
   .opt-btn.selected{border-color:#1565c0;background:#e3f2fd}
   .opt-btn.correct{border-color:#0d47a1!important;background:#e3f2fd!important;color:#0d2157!important;font-weight:700}
   .opt-btn.wrong{border-color:#c62828!important;background:#ffebee!important;color:#b71c1c!important;font-weight:700}
-  .fill-input{border:2px solid #e0e0e0;border-radius:9px;padding:10px 14px;font-size:.98rem;width:100%;outline:none;transition:.2s;margin-bottom:14px}
+  .fill-input{border:2px solid #e0e0e0;border-radius:9px;padding:10px 14px;font-size:1rem;width:100%;outline:none;transition:.2s;margin-bottom:14px}
   .fill-input:focus{border-color:#1565c0}
   .fill-input.correct{border-color:#0d47a1;background:#e3f2fd;color:#0d2157}
   .fill-input.wrong{border-color:#c62828;background:#ffebee;color:#b71c1c}
@@ -261,3 +233,4 @@ const EXERCISES_BODY = `
 <div id="unitContainer"></div>
 `
 
+Exercicios.shellTitle = '📚 Exercícios'

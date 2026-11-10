@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
-import { getTeacher, isUuid, listAllUsers, alunosDoProfessor } from '../../../lib/authz'
+import { getTeacher, isUuid, meusAlunos } from '../../../lib/authz'
 import { listaDoProfessor } from '../../../lib/extras'
 
 // Define o conjunto COMPLETO de destinatarios (alunos e turmas) de uma lista.
@@ -19,11 +19,11 @@ export default async function handler(req, res) {
 
   // So alunos e turmas do proprio professor
   const [{ users, error: le }, { data: minhasTurmas }] = await Promise.all([
-    listAllUsers(),
+    meusAlunos(teacher),
     supabaseAdmin.from('turmas').select('id').eq('teacher_id', teacher.id)
   ])
   if (le) return res.status(400).json({ error: le.message })
-  const meusAlunos = new Set(alunosDoProfessor(users, teacher).map(u => u.id))
+  const meusAlunos = new Set(users.map(u => u.id))
   const minhasT = new Set((minhasTurmas || []).map(t => t.id))
   if (!alunos.every(id => meusAlunos.has(id)) || !turmas.every(id => minhasT.has(id)))
     return res.status(403).json({ error: 'Há alunos ou turmas que não pertencem a você' })

@@ -154,18 +154,6 @@ export default function Mensagens() {
   return (
     <>
       <Head><title>English Step By Step - Mensagens</title></Head>
-      <div style={s.header}>
-        <span style={{ fontWeight: 700, fontSize: '1rem' }}>💬 Mensagens</span>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {professor && <>
-            <button onClick={() => router.push('/correcao')} style={s.btnSec}>👥 Alunos</button>
-            <button onClick={() => router.push('/turmas')} style={s.btnSec}>🏫 Turmas</button>
-            <button onClick={() => router.push('/controle-acessos')} style={s.btnSec}>🔑 Acessos</button>
-          </>}
-          <button onClick={() => router.push('/exercicios')} style={s.btnSec}>📚 Exercícios</button>
-          <button onClick={sair} style={s.btnSec}>Sair</button>
-        </div>
-      </div>
 
       {dados.bloqueado ? (
         <div style={s.page}>
@@ -259,12 +247,12 @@ export default function Mensagens() {
 }
 
 const s = {
-  loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Segoe UI,sans-serif', color: '#0d2157' },
+  loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', fontFamily: 'Segoe UI,sans-serif', color: '#0d2157' },
   header: { background: 'linear-gradient(135deg,#0d2157,#1565c0)', color: '#fff', padding: '13px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,0,0,.2)' },
   btnSec: { background: 'rgba(255,255,255,.2)', border: '1px solid rgba(255,255,255,.5)', color: '#fff', padding: '5px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '.8rem' },
   page: { maxWidth: '700px', margin: '0 auto', padding: '22px' },
   aviso: { background: '#fff8e1', color: '#6d4c00', borderLeft: '4px solid #f9a825', borderRadius: '10px', padding: '16px 18px', fontSize: '.95rem' },
-  layout: { display: 'flex', maxWidth: '1100px', margin: '0 auto', height: 'calc(100vh - 62px)', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,.08)' },
+  layout: { display: 'flex', maxWidth: '1100px', margin: '0 auto', height: 'calc(100dvh - 52px)', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,.08)' },
   lista: { width: '320px', flexShrink: 0, borderRight: '1px solid #eee', overflowY: 'auto', padding: '10px', background: '#fafcff', boxSizing: 'border-box' },
   convBtn: { display: 'flex', flexDirection: 'column', gap: '4px', width: '100%', textAlign: 'left', padding: '10px 12px', border: '2px solid transparent', borderRadius: '10px', cursor: 'pointer', background: 'transparent', fontSize: '.9rem', color: '#222', marginBottom: '4px' },
   convBtnAtiva: { background: '#e3f2fd', borderColor: '#1565c0' },
@@ -284,8 +272,10 @@ const s = {
   lixo: { background: 'none', border: 'none', cursor: 'pointer', fontSize: '.85rem', padding: 0 },
   erro: { background: '#ffebee', color: '#c62828', padding: '8px 16px', fontSize: '.85rem' },
   form: { display: 'flex', gap: '10px', padding: '10px 14px', borderTop: '1px solid #eee', background: '#fff', alignItems: 'flex-end' },
-  textarea: { flex: 1, border: '2px solid #e0e0e0', borderRadius: '10px', padding: '9px 12px', fontSize: '.95rem', fontFamily: 'inherit', resize: 'none', outline: 'none', boxSizing: 'border-box' },
+  textarea: { flex: 1, border: '2px solid #e0e0e0', borderRadius: '10px', padding: '9px 12px', fontSize: '1rem', fontFamily: 'inherit', resize: 'none', outline: 'none', boxSizing: 'border-box' },
   btnEnviar: { background: '#1565c0', color: '#fff', border: 'none', borderRadius: '10px', padding: '10px 20px', cursor: 'pointer', fontWeight: 700, fontSize: '.9rem' },
   vazio: { color: '#888', fontSize: '.88rem', textAlign: 'center', padding: '14px' },
   vazioCentro: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888', fontSize: '.95rem', padding: '20px', textAlign: 'center' },
 }
+
+Mensagens.shellTitle = '💬 Mensagens'

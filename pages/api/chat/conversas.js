@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
-import { isTeacher, listAllUsers, alunosDoProfessor } from '../../../lib/authz'
+import { isTeacher, meusAlunos } from '../../../lib/authz'
 import { getUsuario } from '../../../lib/chat'
 
 const nomeDe = (p, fallback) => p?.full_name?.trim() || fallback
@@ -26,12 +26,12 @@ export default async function handler(req, res) {
 
   if (isTeacher(user)) {
     const [{ users, error }, { data: turmas }, { data: classif }] = await Promise.all([
-      listAllUsers(),
+      meusAlunos(user),
       supabaseAdmin.from('turmas').select('id, nome').eq('teacher_id', user.id).order('nome'),
       supabaseAdmin.from('classificacao_aluno').select('aluno_id, menor_idade, consentimento_em').eq('teacher_id', user.id)
     ])
     if (error) return res.status(400).json({ error: error.message })
-    const alunos = alunosDoProfessor(users, user)
+    const alunos = users
     const ids = alunos.map(a => a.id)
     const classPor = Object.fromEntries((classif || []).map(c => [c.aluno_id, c]))
 
@@ -84,14 +84,17 @@ export default async function handler(req, res) {
       ])
       return [...(a.data || []), ...(b.data || [])]
     }
-    const [existentes, { data: perfis }] = await Promise.all([
+    const idsNome = [...new Set([...colegaIds, teacherId])]
+    const [existentes, { data: perfis }, { data: exib }] = await Promise.all([
       lerConversas(),
-      colegaIds.length ? supabaseAdmin.from('profiles').select('id, full_name').in('id', colegaIds) : Promise.resolve({ data: [] })
+      colegaIds.length ? supabaseAdmin.from('profiles').select('id, full_name').in('id', colegaIds) : Promise.resolve({ data: [] }),
+      supabaseAdmin.from('perfis_usuario').select('user_id, nome_exibicao').in('user_id', idsNome)
     ])
     const perfilPor = Object.fromEntries((perfis || []).map(p => [p.id, p]))
-    nomes[teacherId] = 'Professor'
-    // Colegas da turma: so o NOME (nunca e-mail) aparece nas mensagens
-    for (const id of colegaIds) nomes[id] = nomeDe(perfilPor[id], 'Aluno')
+    const exibPor = Object.fromEntries((exib || []).map(p => [p.user_id, p.nome_exibicao]))
+    nomes[teacherId] = exibPor[teacherId] || 'Professor'
+    // Colegas da turma: so o NOME de exibicao (ou o nome cadastrado), nunca e-mail
+    for (const id of colegaIds) nomes[id] = exibPor[id] || nomeDe(perfilPor[id], 'Aluno')
 
     const desejadas = [
       { tipo: 'individual', teacher_id: teacherId, aluno_id: user.id },
