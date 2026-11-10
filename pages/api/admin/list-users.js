@@ -27,8 +27,23 @@ export default async function handler(req, res) {
     return c.consentimento_em ? 'menor_consentido' : 'menor_sem_consentimento'
   }
 
-  const students = alunosDoProfessor(users, teacher)
-    .map(u => ({ id: u.id, email: u.email, full_name: nameMap[u.id] || null, created_at: u.created_at, chat: statusChat(u.id) }))
+  const alunosLista = alunosDoProfessor(users, teacher)
+  const { data: perfisUsr } = alunosLista.length
+    ? await supabaseAdmin.from('perfis_usuario').select('user_id, nome_exibicao, idade, foto_path').in('user_id', alunosLista.map(a => a.id))
+    : { data: [] }
+  const perfilUsr = Object.fromEntries((perfisUsr || []).map(p => [p.user_id, p]))
+  const comFoto = (perfisUsr || []).filter(p => p.foto_path)
+  const fotoUrl = {}
+  if (comFoto.length) {
+    const { data: assinadas } = await supabaseAdmin.storage.from('avatars').createSignedUrls(comFoto.map(p => p.foto_path), 3600)
+    ;(assinadas || []).forEach((a, i) => { if (a?.signedUrl) fotoUrl[comFoto[i].user_id] = a.signedUrl })
+  }
+
+  const students = alunosLista
+    .map(u => ({
+      id: u.id, email: u.email, full_name: nameMap[u.id] || null, created_at: u.created_at, chat: statusChat(u.id),
+      nomeExibicao: perfilUsr[u.id]?.nome_exibicao || null, idade: perfilUsr[u.id]?.idade ?? null, fotoUrl: fotoUrl[u.id] || null
+    }))
     .sort((a, b) => (a.full_name || 'zzz').localeCompare(b.full_name || 'zzz'))
 
   res.status(200).json({ students, total: slotLimit, used: students.length, available: slotLimit - students.length })

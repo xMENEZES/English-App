@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabaseClient'
 import Head from 'next/head'
+import AppShell from '../components/AppShell'
+import Avatar from '../components/Avatar'
 
 export default function Correcao() {
   const [sessao, setSessao] = useState(null)
@@ -97,18 +99,8 @@ export default function Correcao() {
   if (carregando) return <div style={s.loading}>Carregando...</div>
 
   return (
-    <>
+    <AppShell titulo="👥 Painel de Alunos">
       <Head><title>English Step By Step - Painel de Alunos</title></Head>
-      <div style={s.header}>
-        <span style={{fontWeight:700,fontSize:'1rem'}}>👥 Painel de Alunos</span>
-        <div style={{display:'flex',gap:'10px',alignItems:'center'}}>
-          <button onClick={() => router.push('/turmas')} style={s.btnSecundario}>🏫 Turmas</button>
-          <button onClick={() => router.push('/mensagens')} style={s.btnSecundario}>💬 Mensagens</button>
-          <button onClick={() => router.push('/controle-acessos')} style={s.btnSecundario}>🔑 Controle de Acessos</button>
-          <button onClick={() => router.push('/exercicios')} style={s.btnSecundario}>Ver Exercícios</button>
-          <button onClick={sair} style={s.btnSair}>Sair</button>
-        </div>
-      </div>
 
       <div style={s.page}>
         {/* Seletor de aluno */}
@@ -121,7 +113,7 @@ export default function Correcao() {
               {alunos.map(a => (
                 <button key={a.id} onClick={() => selecionarAluno(a)}
                   style={{...s.alunoBtn, ...(alunoSel?.id===a.id ? s.alunoBtnAtivo : {})}}>
-                  <span style={s.alunoIco}>👤</span>
+                  <Avatar foto={a.fotoUrl} nome={a.full_name} tamanho={36} />
                   <span style={s.alunoTextos}>
                     <span style={{fontWeight:alunoSel?.id===a.id?700:600}}>{a.full_name}</span>
                     {a.full_name !== a.email && <span style={s.alunoEmail}>{a.email}</span>}
@@ -257,7 +249,7 @@ export default function Correcao() {
           </div>
         )}
       </div>
-    </>
+    </AppShell>
   )
 }
 

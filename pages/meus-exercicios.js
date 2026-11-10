@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabaseClient'
 import { UNIDADES } from '../lib/unidades'
 import Head from 'next/head'
+import AppShell from '../components/AppShell'
 
 const TIPOS = [
   { v: 'mc', t: 'Múltipla escolha' },
@@ -172,17 +173,8 @@ export default function MeusExercicios() {
   if (carregando) return <div style={s.loading}>Carregando...</div>
 
   return (
-    <>
+    <AppShell titulo="📝 Meus Exercícios">
       <Head><title>English Step By Step - Meus Exercícios</title></Head>
-      <div style={s.header}>
-        <span style={{ fontWeight: 700, fontSize: '1rem' }}>📝 Meus Exercícios</span>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button onClick={() => router.push('/correcao')} style={s.btnSec}>👥 Alunos</button>
-          <button onClick={() => router.push('/turmas')} style={s.btnSec}>🏫 Turmas</button>
-          <button onClick={() => router.push('/exercicios')} style={s.btnSec}>📚 Exercícios</button>
-          <button onClick={sair} style={s.btnSec}>Sair</button>
-        </div>
-      </div>
 
       <div style={s.page}>
         {msg.texto && <div style={{ ...s.msg, ...(msg.tipo === 'ok' ? s.msgOk : s.msgErr) }}>{msg.texto}</div>}
@@ -362,7 +354,7 @@ export default function MeusExercicios() {
           </div>
         )}
       </div>
-    </>
+    </AppShell>
   )
 }
 
@@ -376,7 +368,7 @@ const s = {
   vazio: { color: '#888', fontSize: '.9rem' },
   label: { display: 'block', fontSize: '.85rem', fontWeight: 600, color: '#333', marginBottom: '6px' },
   sub: { fontSize: '.78rem', color: '#777', margin: '8px 0 4px', fontWeight: 600 },
-  input: { border: '2px solid #e0e0e0', borderRadius: '9px', padding: '9px 12px', fontSize: '.95rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' },
+  input: { border: '2px solid #e0e0e0', borderRadius: '9px', padding: '9px 12px', fontSize: '1rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' },
   caixa: { maxHeight: '140px', overflowY: 'auto', border: '2px solid #f0f0f0', borderRadius: '10px', padding: '6px' },
   linha: { display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 8px', cursor: 'pointer', fontSize: '.9rem' },
   chk: { width: '18px', height: '18px', flexShrink: 0 },

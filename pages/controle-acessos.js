@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabaseClient'
 import Head from 'next/head'
+import AppShell from '../components/AppShell'
+import Avatar from '../components/Avatar'
+import useMobile from '../lib/useMobile'
 
 const LIMIT = 30
 
@@ -16,6 +19,7 @@ export default function ControleAcessos() {
   const [msgGlobal, setMsgGlobal] = useState({ tipo: '', texto: '' })
   const [confirmacao, setConfirmacao] = useState(null) // { userId, nome, acao }
   const router = useRouter()
+  const mobile = useMobile()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -117,20 +121,10 @@ export default function ControleAcessos() {
   if (carregando) return <div style={s.loading}>Carregando...</div>
 
   return (
-    <>
+    <AppShell titulo="🔑 Controle de Acessos">
       <Head><title>English Step By Step - Controle de Acessos</title></Head>
 
       {/* Header */}
-      <div style={s.header}>
-        <span style={{fontWeight:700,fontSize:'1rem'}}>🔑 Controle de Acessos</span>
-        <div style={{display:'flex',gap:'8px'}}>
-          <button onClick={() => router.push('/correcao')} style={s.btnSec}>👥 Painel de Alunos</button>
-          <button onClick={() => router.push('/turmas')} style={s.btnSec}>🏫 Turmas</button>
-          <button onClick={() => router.push('/mensagens')} style={s.btnSec}>💬 Mensagens</button>
-          <button onClick={() => router.push('/exercicios')} style={s.btnSec}>📚 Exercícios</button>
-          <button onClick={sair} style={s.btnSec}>Sair</button>
-        </div>
-      </div>
 
       <div style={s.page}>
 
@@ -176,6 +170,29 @@ export default function ControleAcessos() {
               Nenhum aluno cadastrado ainda. Clique em "Cadastrar Aluno" para enviar o primeiro convite.
             </p>
           ) : (
+            mobile ? (
+              <div style={{display:'flex',flexDirection:'column'}}>
+                {dados.students.map(a => (
+                  <div key={a.id} style={{padding:'14px 16px',borderBottom:'1px solid #eee'}}>
+                    <div style={{display:'flex',alignItems:'center',gap:'12px',marginBottom:'10px'}}>
+                      <Avatar foto={a.fotoUrl} nome={a.full_name || a.email} tamanho={44} />
+                      <div style={{minWidth:0,overflowWrap:'anywhere'}}>
+                        <div style={{fontWeight:700,color:'#0d2157'}}>{a.full_name || <span style={{color:'#aaa',fontStyle:'italic',fontWeight:400}}>Cadastro pendente</span>}</div>
+                        <div style={{fontSize:'.82rem',color:'#777'}}>{a.email}</div>
+                      </div>
+                    </div>
+                    <select value={a.chat || 'nao_classificado'} onChange={e => classificarAluno(a, e.target.value)}
+                      style={{...s.selectChat, maxWidth:'100%', width:'100%', fontSize:'1rem', padding:'9px 10px', marginBottom:'10px', borderColor: (a.chat === 'adulto' || a.chat === 'menor_consentido') ? '#2e7d32' : '#ef9a9a'}}>
+                      {OPCOES_CHAT.map(o => <option key={o.v} value={o.v} disabled={o.v === 'nao_classificado'}>{o.t}</option>)}
+                    </select>
+                    <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
+                      <button onClick={() => redefinirSenha(a.email, a.full_name)} style={s.btnReset}>🔑 Redefinir Senha</button>
+                      <button onClick={() => setConfirmacao({ userId: a.id, nome: a.full_name, email: a.email })} style={s.btnRemover}>🗑 Remover Acesso</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
             <div style={{overflowX:'auto'}}>
               <table style={s.table}>
                 <thead>
@@ -190,9 +207,12 @@ export default function ControleAcessos() {
                   {dados.students.map((a, i) => (
                     <tr key={a.id} style={{background: i%2===0?'#fff':'#e8f4fd'}}>
                       <td style={s.td}>
-                        {a.full_name
-                          ? <b>{a.full_name}</b>
-                          : <span style={{color:'#aaa',fontStyle:'italic'}}>Cadastro pendente</span>}
+                        <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
+                          <Avatar foto={a.fotoUrl} nome={a.full_name || a.email} tamanho={32} />
+                          {a.full_name
+                            ? <b>{a.full_name}</b>
+                            : <span style={{color:'#aaa',fontStyle:'italic'}}>Cadastro pendente</span>}
+                        </div>
                       </td>
                       <td style={s.td}>{a.email}</td>
                       <td style={s.td}>
@@ -217,6 +237,7 @@ export default function ControleAcessos() {
                 </tbody>
               </table>
             </div>
+            )
           )}
         </div>
       </div>
@@ -278,7 +299,7 @@ export default function ControleAcessos() {
           </div>
         </div>
       )}
-    </>
+    </AppShell>
   )
 }
 

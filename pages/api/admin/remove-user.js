@@ -16,6 +16,10 @@ export default async function handler(req, res) {
   if (isTeacher(alvo.user) || alvo.user.app_metadata?.invited_by !== teacher.id)
     return res.status(403).json({ error: 'Este usuário não pertence a você' })
 
+  // Apaga a foto de perfil do aluno (o arquivo nao some sozinho com o usuario)
+  const { data: perfilFoto } = await supabaseAdmin.from('perfis_usuario').select('foto_path').eq('user_id', userId).maybeSingle()
+  if (perfilFoto?.foto_path) await supabaseAdmin.storage.from('avatars').remove([perfilFoto.foto_path])
+
   await supabaseAdmin.from('profiles').delete().eq('id', userId)
   await supabaseAdmin.from('exercise_results').delete().eq('user_id', userId)
   const { error } = await supabaseAdmin.auth.admin.deleteUser(userId)

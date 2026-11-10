@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabaseClient'
 import Head from 'next/head'
+import AppShell from '../components/AppShell'
+import Avatar from '../components/Avatar'
 
 export default function Turmas() {
   const [carregando, setCarregando] = useState(true)
@@ -107,18 +109,8 @@ export default function Turmas() {
   if (carregando) return <div style={s.loading}>Carregando...</div>
 
   return (
-    <>
+    <AppShell titulo="🏫 Turmas">
       <Head><title>English Step By Step - Turmas</title></Head>
-      <div style={s.header}>
-        <span style={{ fontWeight: 700, fontSize: '1rem' }}>🏫 Turmas</span>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button onClick={() => router.push('/correcao')} style={s.btnSec}>👥 Painel de Alunos</button>
-          <button onClick={() => router.push('/mensagens')} style={s.btnSec}>💬 Mensagens</button>
-          <button onClick={() => router.push('/controle-acessos')} style={s.btnSec}>🔑 Acessos</button>
-          <button onClick={() => router.push('/exercicios')} style={s.btnSec}>📚 Exercícios</button>
-          <button onClick={sair} style={s.btnSec}>Sair</button>
-        </div>
-      </div>
 
       <div style={s.page}>
         {msg.texto && (
@@ -169,6 +161,7 @@ export default function Turmas() {
                     <label key={a.id} style={s.alunoLinha}>
                       <input type="checkbox" checked={marcados.includes(a.id)} onChange={() => alternar(a.id)}
                         style={{ width: '18px', height: '18px', flexShrink: 0 }} />
+                      <Avatar foto={a.fotoUrl} nome={a.nome} tamanho={30} />
                       <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0, overflowWrap: 'anywhere' }}>
                         <span style={{ fontWeight: 600 }}>{a.nome}</span>
                         {a.nome !== a.email && <span style={{ fontSize: '.78rem', color: '#888' }}>{a.email}</span>}
@@ -191,7 +184,7 @@ export default function Turmas() {
           </div>
         </div>
       </div>
-    </>
+    </AppShell>
   )
 }
 
