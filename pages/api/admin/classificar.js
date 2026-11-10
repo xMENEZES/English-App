@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import { getTeacher, isUuid, meusAlunos } from '../../../lib/authz'
+import { VERSOES } from '../../../lib/lgpd/config'
 
 // Classifica o aluno para liberar o chat:
 //  - adulto: { alunoId, menor: false }
@@ -19,12 +20,24 @@ export default async function handler(req, res) {
     return res.status(403).json({ error: 'Este aluno não pertence a você' })
 
   const registrar = menor && consentimento === true
+  const limpa = (v) => String(v ?? '').replace(/[\u0000-\u001F\u007F]/g, '').replace(/\s+/g, ' ').trim()
+  const respNome = limpa(req.body?.responsavelNome)
+  const respVinculo = limpa(req.body?.responsavelVinculo)
+  if (registrar) {
+    if (respNome.length < 2 || respNome.length > 120) return res.status(400).json({ error: 'Informe o nome completo do responsável' })
+    if (respVinculo.length < 2 || respVinculo.length > 40) return res.status(400).json({ error: 'Informe o vínculo com o aluno (mãe, pai, tutor...)' })
+    if (req.body?.termoRecebido !== true) return res.status(400).json({ error: 'Confirme que recebeu o termo assinado' })
+  }
   const { error } = await supabaseAdmin.from('classificacao_aluno').upsert({
     aluno_id: alunoId,
     teacher_id: teacher.id,
     menor_idade: menor,
     consentimento_em: registrar ? new Date().toISOString() : null,
     consentimento_por: registrar ? teacher.id : null,
+    responsavel_nome: registrar ? respNome : null,
+    responsavel_vinculo: registrar ? respVinculo : null,
+    forma_coleta: registrar ? 'termo_assinado' : null,
+    versao_termo: registrar ? VERSOES.consentimento : null,
     updated_at: new Date().toISOString()
   })
   if (error) return res.status(400).json({ error: error.message })

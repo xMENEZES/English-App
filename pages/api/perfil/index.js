@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import { isTeacher } from '../../../lib/authz'
 import { getUsuario, podeEnviarFoto } from '../../../lib/chat'
+import { VERSOES } from '../../../lib/lgpd/config'
 
 const BUCKET = 'avatars'
 
@@ -16,10 +17,12 @@ export default async function handler(req, res) {
   if (!user) return res.status(401).json({ error: 'Sessão inválida' })
 
   if (req.method === 'GET') {
-    const [{ data: p }, { data: cad }, podeFoto] = await Promise.all([
+    const [{ data: p }, { data: cad }, podeFoto, aceite] = await Promise.all([
       supabaseAdmin.from('perfis_usuario').select('nome_exibicao, idade, foto_path').eq('user_id', user.id).maybeSingle(),
       supabaseAdmin.from('profiles').select('full_name').eq('id', user.id).maybeSingle(),
-      podeEnviarFoto(user)
+      podeEnviarFoto(user),
+      supabaseAdmin.from('aceites_termos').select('id').eq('user_id', user.id)
+        .eq('versao_termos', VERSOES.termos).eq('versao_privacidade', VERSOES.privacidade).maybeSingle()
     ])
     return res.status(200).json({
       papel: isTeacher(user) ? 'professor' : 'aluno',
@@ -28,7 +31,9 @@ export default async function handler(req, res) {
       nomeExibicao: p?.nome_exibicao || null,
       idade: p?.idade ?? null,
       fotoUrl: await urlDaFoto(p?.foto_path),
-      podeFoto
+      podeFoto,
+      // Se a tabela de aceites ainda nao existir (migracao 009 pendente), nao trava o acesso
+      aceiteOk: aceite.error ? true : !!aceite.data
     })
   }
 
