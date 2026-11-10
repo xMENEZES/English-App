@@ -758,7 +758,7 @@ function answerMatch(u,a){
   }
   return true;
 }
-function goHome(){document.getElementById('homeScreen').classList.add('active');document.getElementById('unitContainer').innerHTML='';document.getElementById('backBtn').style.display='none';refreshBadges();if(window.renderExtrasHome)renderExtrasHome();}
+function goHome(){document.getElementById('homeScreen').classList.add('active');document.getElementById('unitContainer').innerHTML='';document.getElementById('backBtn').style.display='none';refreshBadges();if(window.renderExtrasHome)renderExtrasHome();if(window.homeTabRestore)homeTabRestore();}
 function refreshBadges(){
   for(var u in badges){
     var el=document.getElementById('badge'+u);if(!el)continue;
@@ -807,9 +807,8 @@ function renderUnit(){
     +'<button class="retry-btn" onclick="openUnit('+curUnit+')">Tentar Novamente</button>'
     +'<button class="home-btn2" onclick="goHome()">Menu Principal</button></div>';
   if(curIdx<total)h+=renderEx(u.exercises[curIdx]);
-  h+='<div id="extrasUnit"></div></div>';
+  h+='</div>';
   document.getElementById('unitContainer').innerHTML=h;
-  if(window.renderExtrasUnit)renderExtrasUnit(curUnit);
   var rb=document.getElementById('resumeBar');
   if(rb&&curIdx>0)rb.style.display='flex';
 }

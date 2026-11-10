@@ -47,35 +47,67 @@
     return h + '</div>';
   }
 
-  // Tela inicial: listas que NAO estao atreladas a uma unidade
+  // Aba "Exercicios do Professor": modulos por unidade + "Outros exercicios" (sem unidade)
+  function modulo(titulo, sub, icone, ls, outros) {
+    return '<div class="mod-hdr' + (outros ? ' mod-outros' : '') + '"><span class="mod-num">' + icone + '</span>'
+      + '<div><b>' + esc(titulo) + '</b><small>' + esc(sub) + '</small></div></div>' + cartoes(ls);
+  }
+
+  function atualizarBadge(ls) {
+    var b = document.getElementById('tabProfBadge');
+    if (!b) return;
+    var n = ls.filter(function (l) { return l.respondidas < l.total; }).length;   // listas ainda nao concluidas
+    b.textContent = n; b.style.display = n ? 'inline-block' : 'none';
+  }
+
   window.renderExtrasHome = function () {
     var el = document.getElementById('extrasHome');
     if (!el) return;
     api('/api/extras/aluno').then(function (r) {
-      var ls = ((r.d && r.d.listas) || []).filter(function (l) { return l.unidade == null; });
-      if (!document.getElementById('extrasHome')) return;
-      el.innerHTML = ls.length
-        ? '<div class="vocab-section" style="margin-top:26px"><h3>Exercicios do Professor</h3>' + cartoes(ls) + '</div>'
-        : '';
+      var ls = (r.d && r.d.listas) || [];
+      var alvo = document.getElementById('extrasHome');
+      if (!alvo) return;
+      atualizarBadge(ls);
+      if (!ls.length) {
+        alvo.innerHTML = '<div class="vocab-section" style="margin-top:20px"><h3>Exercicios do Professor</h3>'
+          + '<p style="color:#666;font-size:.92rem">Seu professor ainda nao liberou exercicios para voce.</p></div>';
+        return;
+      }
+      var outros = ls.filter(function (l) { return l.unidade == null; }), porUnidade = {};
+      ls.forEach(function (l) { if (l.unidade != null) { (porUnidade[l.unidade] = porUnidade[l.unidade] || []).push(l); } });
+      var h = '';
+      if (outros.length) h += modulo('Outros exercicios', 'Exercicios do professor sem unidade', '&#9733;', outros, true);
+      Object.keys(porUnidade).map(Number).sort(function (a, b) { return a - b; }).forEach(function (n) {
+        var u = (typeof UNITS !== 'undefined' && UNITS[n]) ? UNITS[n] : null;
+        h += modulo(u ? u.title : 'Unidade ' + n, 'Unidade ' + n, String(n), porUnidade[n], false);
+      });
+      alvo.innerHTML = h;
     });
   };
 
-  // Dentro da unidade: secao "Exercicios Extras"
-  window.renderExtrasUnit = function (n) {
-    var el = document.getElementById('extrasUnit');
-    if (!el) return;
-    api('/api/extras/aluno').then(function (r) {
-      var ls = ((r.d && r.d.listas) || []).filter(function (l) { return l.unidade === n; });
-      var alvo = document.getElementById('extrasUnit');
-      if (!alvo || !ls.length) return;
-      alvo.innerHTML = '<div class="vocab-section"><h3>Exercicios Extras</h3>' + cartoes(ls) + '</div>';
-    });
+  // Abas da tela inicial: Livro x Professor (a escolha fica salva na sessao)
+  function homeTab(t) {
+    try { sessionStorage.setItem('home_tab', t); } catch (e) { /* ok */ }
+    var liv = document.getElementById('paneLivro'), pr = document.getElementById('extrasHome');
+    var a = document.getElementById('tabLivro'), b = document.getElementById('tabProf');
+    if (!liv || !pr || !a || !b) return;
+    liv.style.display = t === 'prof' ? 'none' : '';
+    pr.style.display = t === 'prof' ? '' : 'none';
+    a.classList.toggle('active', t !== 'prof');
+    b.classList.toggle('active', t === 'prof');
+  }
+  window.homeTab = homeTab;
+  window.homeTabRestore = function () {
+    var t = 'livro';
+    try { t = sessionStorage.getItem('home_tab') || 'livro'; } catch (e) { /* ok */ }
+    homeTab(t);
   };
 
   window.extrasAbrir = function (id) {
     api('/api/extras/aluno?listaId=' + encodeURIComponent(id)).then(function (r) {
       if (!r.ok) { alert((r.d && r.d.error) || 'Nao foi possivel abrir a lista.'); return; }
       X.lista = r.d.lista; X.exs = r.d.exercicios || []; X.res = r.d.resultados || {}; X.audioLiberado = r.d.audioLiberado === true;
+      try { sessionStorage.setItem('home_tab', 'prof'); } catch (e) { /* ok */ }
       X.idx = 0;
       for (var i = 0; i < X.exs.length; i++) { if (!X.res[X.exs[i].id]) { X.idx = i; break; } X.idx = X.exs.length; }
       X.sel = null; X.respondeu = false;
@@ -90,7 +122,7 @@
   function topo() {
     var L = X.lista, total = X.exs.length, pct = Math.round(Math.min(X.idx, total) / total * 100);
     return '<div class="unit-hdr"><h2>' + esc(L.titulo) + '</h2><p>'
-      + (L.unidade ? 'Exercicios Extras - Unidade ' + L.unidade : 'Exercicios do Professor') + '</p></div>'
+      + (L.unidade ? 'Exercicios do Professor - Unidade ' + L.unidade + (typeof UNITS !== 'undefined' && UNITS[L.unidade] ? ': ' + UNITS[L.unidade].title : '') : 'Exercicios do Professor') + '</p></div>'
       + '<div class="prog-wrap"><div class="prog-bar" style="width:' + pct + '%"></div></div>';
   }
 
@@ -318,12 +350,11 @@
       + '<div class="score-sub">' + (auto ? 'Voce acertou ' + acertos + ' de ' + auto + ' questoes corrigidas.' : 'Suas respostas foram enviadas.')
       + (pend ? ' ' + pend + ' aguardando a correcao do professor.' : '') + '</div><br>'
       + '<button class="retry-btn" onclick="extrasRefazer()">Refazer a lista</button>'
-      + (X.lista.unidade ? '<button class="home-btn2" onclick="openUnit(' + X.lista.unidade + ')">Voltar a Unidade</button>' : '')
       + '<button class="home-btn2" onclick="goHome()">Menu Principal</button></div>'
       + (retornos ? '<h3 style="margin:18px 0 10px;color:#0d2157">Suas respostas livres e em audio</h3>' + retornos : '')
       + '</div>';
     cont.innerHTML = h;
   }
 
-  setTimeout(function () { if (window.renderExtrasHome) window.renderExtrasHome(); }, 400);
+  setTimeout(function () { if (window.homeTabRestore) window.homeTabRestore(); if (window.renderExtrasHome) window.renderExtrasHome(); }, 400);
 })();

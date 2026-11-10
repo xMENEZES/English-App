@@ -226,7 +226,7 @@ export default function MeusExercicios() {
                   <button key={l.id} onClick={() => abrirLista(l)} style={{ ...s.listaBtn, ...(l.id === selId ? s.listaBtnAtiva : {}) }}>
                     <span style={{ fontWeight: 700, overflowWrap: 'anywhere' }}>{l.titulo}</span>
                     <span style={{ fontSize: '.76rem', color: '#666' }}>
-                      {l.unidade ? `Unidade ${l.unidade}` : 'Fora das unidades'} · {l.totalExercicios} exerc.
+                      {l.unidade ? `Módulo da Unidade ${l.unidade}` : 'Outros exercícios'} · {l.totalExercicios} exerc.
                       {' · '}<b style={{ color: l.publicada ? '#2e7d32' : '#c62828' }}>{l.publicada ? 'Publicada' : 'Rascunho'}</b>
                     </span>
                   </button>
@@ -243,11 +243,11 @@ export default function MeusExercicios() {
                   <input value={dados.titulo} onChange={e => setDados(d => ({ ...d, titulo: e.target.value }))} maxLength={80}
                     style={{ ...s.input, width: '100%', marginBottom: '12px' }} />
 
-                  <label style={s.label}>Onde aparece para o aluno</label>
+                  <label style={s.label}>Módulo em que a lista aparece para o aluno</label>
                   <select value={dados.unidade} onChange={e => setDados(d => ({ ...d, unidade: e.target.value }))}
                     style={{ ...s.input, width: '100%', marginBottom: '12px', background: '#fff' }}>
-                    <option value="">Fora das unidades (na tela inicial)</option>
-                    {UNIDADES.map((u, i) => <option key={i} value={i + 1}>Dentro da Unidade {i + 1}: {u} (Exercícios Extras)</option>)}
+                    <option value="">Outros exercícios (sem unidade)</option>
+                    {UNIDADES.map((u, i) => <option key={i} value={i + 1}>Módulo da Unidade {i + 1}: {u}</option>)}
                   </select>
 
                   <label style={{ ...s.label, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
