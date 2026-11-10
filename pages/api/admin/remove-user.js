@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import { getTeacher, isUuid, isTeacher } from '../../../lib/authz'
+import { apagarAudiosDe, removerArquivos } from '../../../lib/armazenamento'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
@@ -19,6 +20,11 @@ export default async function handler(req, res) {
   // Apaga a foto de perfil do aluno (o arquivo nao some sozinho com o usuario)
   const { data: perfilFoto } = await supabaseAdmin.from('perfis_usuario').select('foto_path').eq('user_id', userId).maybeSingle()
   if (perfilFoto?.foto_path) await supabaseAdmin.storage.from('avatars').remove([perfilFoto.foto_path])
+
+  // Apaga gravacoes de voz e o termo assinado digitalizado do aluno
+  await apagarAudiosDe({ user_id: userId })
+  const { data: termoAluno } = await supabaseAdmin.from('classificacao_aluno').select('termo_arquivo_path').eq('aluno_id', userId).maybeSingle()
+  if (termoAluno?.termo_arquivo_path) await removerArquivos('termos-assinados', [termoAluno.termo_arquivo_path])
 
   await supabaseAdmin.from('profiles').delete().eq('id', userId)
   await supabaseAdmin.from('exercise_results').delete().eq('user_id', userId)

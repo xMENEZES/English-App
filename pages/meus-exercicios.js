@@ -8,9 +8,10 @@ const TIPOS = [
   { v: 'mc', t: 'Múltipla escolha' },
   { v: 'fill', t: 'Completar a lacuna' },
   { v: 'translate', t: 'Tradução' },
-  { v: 'livre', t: 'Resposta livre (você corrige)' }
+  { v: 'livre', t: 'Resposta livre (você corrige)' },
+  { v: 'audio', t: 'Resposta em áudio (o aluno grava a voz)' }
 ]
-const ROTULO = { mc: 'Múltipla escolha', fill: 'Completar', translate: 'Tradução', livre: 'Livre' }
+const ROTULO = { mc: 'Múltipla escolha', fill: 'Completar', translate: 'Tradução', livre: 'Livre', audio: 'Áudio' }
 const FORM_VAZIO = { id: null, tipo: 'mc', enunciado: '', opcoes: ['', '', '', ''], correta: 0, resposta: '', alternativas: '' }
 
 export default function MeusExercicios() {
@@ -135,6 +136,8 @@ export default function MeusExercicios() {
       const opcoes = form.opcoes.map(o => o.trim()).filter(Boolean)
       body.opcoes = opcoes
       body.resposta = (form.opcoes[form.correta] || '').trim()
+    } else if (form.tipo === 'audio') {
+      body.resposta = form.resposta   // frase de referência (opcional; só o professor vê)
     } else if (form.tipo !== 'livre') {
       body.resposta = form.resposta
       body.alternativas = form.alternativas.split('\n').map(a => a.trim()).filter(Boolean)
@@ -193,7 +196,11 @@ export default function MeusExercicios() {
               <div key={p.id} style={s.pendente}>
                 <div style={{ fontSize: '.78rem', color: '#777' }}>{p.aluno} · {p.lista} · {new Date(p.created_at).toLocaleString('pt-BR')}</div>
                 <div style={{ fontWeight: 600, margin: '6px 0', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{p.enunciado}</div>
-                <div style={s.respAluno}>{p.resposta}</div>
+                {p.audioUrl
+                  ? <audio controls preload="none" src={p.audioUrl} style={{ width: '100%' }} />
+                  : p.resposta
+                    ? <div style={s.respAluno}>{p.resposta}</div>
+                    : <div style={s.respAluno}>(gravação de voz indisponível)</div>}
                 <textarea value={correcoes[p.id] || ''} onChange={e => setCorrecoes(c => ({ ...c, [p.id]: e.target.value.slice(0, 1000) }))}
                   placeholder="Comentário para o aluno (opcional)" rows={2} style={{ ...s.input, width: '100%', margin: '10px 0', resize: 'vertical' }} />
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -291,6 +298,7 @@ export default function MeusExercicios() {
                         {ex.tipo === 'mc' && <div style={s.det}>Alternativas: {ex.opcoes.join(' | ')} — certa: <b>{ex.resposta}</b></div>}
                         {(ex.tipo === 'fill' || ex.tipo === 'translate') && <div style={s.det}>Resposta: <b>{ex.resposta}</b>{ex.alternativas?.length ? ` (também aceita: ${ex.alternativas.join(' | ')})` : ''}</div>}
                         {ex.tipo === 'livre' && <div style={s.det}>Resposta livre — corrigida por você</div>}
+                        {ex.tipo === 'audio' && <div style={s.det}>Resposta em áudio — você ouve e corrige{ex.resposta ? ` (referência: ${ex.resposta})` : ''}</div>}
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         <button onClick={() => editarExercicio(ex)} style={s.btnMini}>Editar</button>
@@ -341,6 +349,15 @@ export default function MeusExercicios() {
                     )}
 
                     {form.tipo === 'livre' && <div style={s.dica}>O aluno escreve um texto livre. Você corrige em "Pendentes de correção".</div>}
+
+                    {form.tipo === 'audio' && (
+                      <>
+                        <label style={s.label}>Frase de referência (opcional; só você vê)</label>
+                        <input value={form.resposta} onChange={e => setForm(f => ({ ...f, resposta: e.target.value }))} maxLength={300}
+                          placeholder="Ex.: I usually wake up at seven." style={{ ...s.input, width: '100%' }} />
+                        <div style={s.dica}>O aluno grava até 60 segundos de voz. Você ouve em "Pendentes de correção" e marca adequada ou precisa melhorar. Só alunos liberados (adulto, ou menor com o termo v2.0 assinado) conseguem gravar.</div>
+                      </>
+                    )}
 
                     <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                       <button type="submit" style={s.btnPrimario}>{form.id ? 'Salvar exercício' : 'Adicionar exercício'}</button>

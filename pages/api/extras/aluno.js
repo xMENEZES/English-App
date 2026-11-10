@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import { isUuid } from '../../../lib/authz'
-import { getUsuario } from '../../../lib/chat'
+import { getUsuario, podeGravarAudio } from '../../../lib/chat'
+import { linksTemporarios } from '../../../lib/armazenamento'
 import { listasVisiveisAoAluno, ultimoPorExercicio } from '../../../lib/extras'
 
 // Visao do ALUNO: listas que ele pode ver (com progresso) e, por lista, os exercicios SEM as respostas certas.
@@ -18,18 +19,20 @@ export default async function handler(req, res) {
     if (!lista) return res.status(404).json({ error: 'Lista não encontrada' })
     const [{ data: exs }, { data: rs }] = await Promise.all([
       supabaseAdmin.from('exercicios_extras').select('id, tipo, enunciado, opcoes').eq('lista_id', lista.id).order('ordem').order('created_at'),
-      supabaseAdmin.from('resultados_extras').select('exercicio_id, resposta, resposta_certa, correta, status, avaliacao, comentario, created_at')
+      supabaseAdmin.from('resultados_extras').select('exercicio_id, resposta, resposta_certa, correta, status, avaliacao, comentario, audio_path, created_at')
         .eq('lista_id', lista.id).eq('user_id', user.id).order('created_at', { ascending: false })
     ])
     const ultimos = ultimoPorExercicio(rs)
+    const links = await linksTemporarios('audios', Object.values(ultimos).map(r => r.audio_path))
     const resultados = {}
     for (const [id, r] of Object.entries(ultimos)) {
-      resultados[id] = { resposta: r.resposta, respostaCerta: r.resposta_certa, correta: r.correta, status: r.status, avaliacao: r.avaliacao, comentario: r.comentario }
+      resultados[id] = { resposta: r.resposta, respostaCerta: r.resposta_certa, correta: r.correta, status: r.status, avaliacao: r.avaliacao, comentario: r.comentario, audioUrl: links[r.audio_path] || null }
     }
     return res.status(200).json({
       lista: { id: lista.id, titulo: lista.titulo, unidade: lista.unidade },
       exercicios: exs || [],
-      resultados
+      resultados,
+      audioLiberado: await podeGravarAudio(user)
     })
   }
 

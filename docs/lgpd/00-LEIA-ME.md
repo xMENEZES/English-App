@@ -21,6 +21,8 @@
 | `docs/lgpd/05-direitos-do-titular.md` | Procedimento de Direitos do Titular | Como atender pedidos dentro do prazo |
 
 ## Versões
+**Versão atual: 2.0** (inclui gravação de voz em exercícios; substitui a 1.0). Todos aceitam os Termos e a Política 2.0 no próximo acesso. Responsáveis que assinaram a versão 1.0 do termo continuam com chat e foto, mas **a gravação de voz só é liberada com o termo 2.0** (use "Renovar termo (v2.0)" no Controle de Acessos).
+
 As versões ficam em `lib/lgpd/config.js`. Ao mudar o texto de um documento, **aumente a versão**: todos os usuários precisarão aceitar de novo no próximo acesso. O termo do responsável tem versão própria; o sistema registra qual versão cada responsável assinou.
 
 ## Fluxo para alunos menores
@@ -34,6 +36,8 @@ As versões ficam em `lib/lgpd/config.js`. Ao mudar o texto de um documento, **a
 - [ ] Revisão jurídica das minutas (principalmente as marcações **[REVISAR]**).
 - [ ] Decidir se consta o **CPF** do controlador no ROPA interno (não é exibido nas páginas públicas).
 - [ ] Guardar os termos assinados em local seguro (papel ou digitalização protegida) pelo prazo definido em `03-retencao-e-descarte.md`.
-- [ ] Antes de ativar **gravação de áudio** ou **videochamada**: atualizar a Política, criar nova versão do termo (v2) e pedir novo consentimento dos responsáveis.
+- [ ] Antes de ativar **videochamada**: atualizar a Política, criar nova versão do termo (v3) e pedir novo consentimento dos responsáveis.
+- [ ] Configurar a variável `CRON_SECRET` na Vercel (texto aleatório de 16+ caracteres) para a limpeza diária das gravações de voz funcionar.
+- [ ] Colher o **termo v2.0 assinado** dos responsáveis dos menores que forem gravar voz e registrar no Controle de Acessos (o termo digitalizado pode ser anexado e fica em área privada).
 - [ ] Conferir se os contratos/termos dos operadores (Supabase e Vercel) cobrem a transferência internacional (art. 33) **[REVISAR]**.
 - [ ] Avaliar com o jurídico a necessidade de nomear formalmente o encarregado e se o controlador se enquadra como agente de tratamento de pequeno porte (Resolução CD/ANPD nº 2/2022) **[REVISAR]**.

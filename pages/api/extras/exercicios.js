@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import { getTeacher, isUuid } from '../../../lib/authz'
 import { LIM, validarExercicio, listaDoProfessor } from '../../../lib/extras'
+import { apagarAudiosDe } from '../../../lib/armazenamento'
 
 // Exercicio pertence a uma lista do professor? Retorna { ex, lista } ou null.
 async function exercicioDoProfessor(id, teacher) {
@@ -49,6 +50,7 @@ export default async function handler(req, res) {
   if (req.method === 'DELETE') {
     const dono = await exercicioDoProfessor(req.body?.id, teacher)
     if (!dono) return res.status(404).json({ error: 'Exercício não encontrado' })
+    await apagarAudiosDe({ exercicio_id: dono.ex.id })
     const { error } = await supabaseAdmin.from('exercicios_extras').delete().eq('id', dono.ex.id)
     if (error) return res.status(400).json({ error: error.message })
     return res.status(200).json({ ok: true })
